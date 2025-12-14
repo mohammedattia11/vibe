@@ -1,5 +1,4 @@
-  "use client";
-
+"use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTRPC } from "@/trpc/client";
@@ -11,6 +10,7 @@ export default function Home() {
   const [value, setValue] = useState("");
   const trpc = useTRPC();
   const { data: messages } = useQuery(trpc.messages.getmany.queryOptions());
+  console.log(messages)
   const createMessage = useMutation(
     trpc.messages.create.mutationOptions({
       onSuccess: () => {
@@ -35,7 +35,6 @@ export default function Home() {
       >
         Invoke Background job
       </Button>
-      {JSON.stringify(messages,null,2)}
     </div>
   );
 }

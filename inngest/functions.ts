@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { Sandbox } from "@e2b/code-interpreter";
-
-import { createAgent, createNetwork, createTool, gemini, type Tool } from "@inngest/agent-kit";
-
+import { createAgent, createNetwork, createTool, openai, type Tool } from "@inngest/agent-kit";
 import { PROMPT } from "@/prompt";
 import { inngest } from "./client";
 import { getsandbox, lastAssistantTextMessageContent } from "./utils";
@@ -27,11 +25,14 @@ export const codeAgentFunction = inngest.createFunction(
       name: "codeAgent",
       description: "An expert coding agent",
       system: PROMPT ,
-      model: gemini({
-        model: "gemini-2.5-flash",
-        apiKey: process.env.GEMINI_API_KEY,
+      model: openai({
+        model: "gpt-4o-mini",
+        defaultParameters: {
+          temperature:0.1
+        }
       }),
       tools: [
+        // Terminal tool
         createTool({
           name:"terminal",
           description:"Use the terminal to run commands",
@@ -62,6 +63,7 @@ export const codeAgentFunction = inngest.createFunction(
             });
           },
         }),
+        // create and update files tool
         createTool({
           name: "createOrUpdateFiles",
           description: "Create or update files in the sandbox",
@@ -96,6 +98,7 @@ export const codeAgentFunction = inngest.createFunction(
             }
           }
         }),
+        // read files tool
         createTool({
           name: "readFiles",
           description: "Read files from the sandbox",
@@ -123,13 +126,11 @@ export const codeAgentFunction = inngest.createFunction(
         onResponse: async ({ result, network }) => {
           const lastAssistantMessageText = 
           lastAssistantTextMessageContent(result);
-
           if (lastAssistantMessageText && network){
             if (lastAssistantMessageText.includes("<task_summary>")){
               network.state.data.summary =lastAssistantMessageText;
             }
           }
-
           return result;
        },
       }, 
@@ -138,10 +139,9 @@ export const codeAgentFunction = inngest.createFunction(
     const network = createNetwork<AgentState>({
       name: "coding-agent-network",
       agents: [codeAgent],
-      maxIter: 15,
+      maxIter: 10,
       router:async ({network}) => {
         const summary =network.state.data.summary;
-
         if (summary){
           return ;
         }
@@ -150,7 +150,6 @@ export const codeAgentFunction = inngest.createFunction(
     })
 
     const result = await network.run(event.data.value);
-
     const isError = 
        !result.state.data.summary ||
        Object.keys(result.state.data.files || {}).length ===0;
@@ -187,8 +186,6 @@ export const codeAgentFunction = inngest.createFunction(
       })
     });
 
-
-    console.log(sandboxUrl);
     return { 
       url: sandboxUrl,
       title: "Fragment",
@@ -197,4 +194,3 @@ export const codeAgentFunction = inngest.createFunction(
     };
   }
 );
-                
