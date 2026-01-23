@@ -83,6 +83,7 @@ export const ProjectView = ({ projectId }: Props) => {
               </TabsList>
 
               <Button
+                variant={"tertiary"}
                 asChild
                 className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black hover:opacity-90"
               >
