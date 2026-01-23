@@ -6,41 +6,43 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { redirect } from "next/navigation";
 
 const Page = () => {
   const router = useRouter();
   const [value, setValue] = useState("");
   const trpc = useTRPC();
+  redirect("/home");
   const createProject = useMutation(
     trpc.projects.create.mutationOptions({
-      onError : (error) => {
+      onError: (error) => {
         toast.error(error.message);
       },
-      onSuccess : (data) => {
+      onSuccess: (data) => {
         router.push(`/projects/${data.id}`);
       },
-    })
+    }),
   );
 
   return (
     <div className="h-screen w-screen flex items-center justify-center ">
-      <div className = "max-w-7xl mx-auto flex items-cnater flex-col gap-y-4 justify-center">
-      <Input
-        placeholder="Start typing"
-        type="text"
-        value={value}
-        onChange={e => setValue(e.target.value)}
-      />
-      <Button
-        disabled={createProject.isPending}
-        onClick={() => createProject.mutate({ value: value })}
-        className="cursor-pointer"
-      >
-        submit
-      </Button>
+      <div className="max-w-7xl mx-auto flex items-cnater flex-col gap-y-4 justify-center">
+        <Input
+          placeholder="Start typing"
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+        <Button
+          disabled={createProject.isPending}
+          onClick={() => createProject.mutate({ value: value })}
+          className="cursor-pointer"
+        >
+          submit
+        </Button>
       </div>
-      </div>
+    </div>
   );
-}
+};
 
 export default Page;
