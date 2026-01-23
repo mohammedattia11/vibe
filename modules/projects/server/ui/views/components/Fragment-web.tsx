@@ -23,7 +23,7 @@ export function FragmentWeb({ data }: Props) {
     <div className="flex flex-col w-full h-full">
       <div className="p-4 border-b bg-sidebar-border flex items-center gap-2">
         <Hint
-          text={data.sandboxUrl ? "Refresh" : "No URL available"}
+          text={data?.sandboxUrl ? "Refresh" : "No URL available"}
           side="top"
           align="center"
         >
