@@ -1,0 +1,1 @@
+export type TreeItemType = string | [string, ...TreeItemType[]];
