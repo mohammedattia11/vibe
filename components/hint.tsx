@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-import { InfoIcon } from "lucide-react";
+// import { InfoIcon } from "lucide-react";
 
 interface HintProps {
   text: string;
@@ -30,7 +30,7 @@ export const Hint = ({
         <TooltipTrigger asChild>
           <span className="inline-flex items-center gap-1">
             {children}
-            <InfoIcon className="h-4 w-4 text-muted-foreground" />
+            {/*<InfoIcon className="h-4 w-4 text-muted-foreground" />*/}
           </span>
         </TooltipTrigger>
 
