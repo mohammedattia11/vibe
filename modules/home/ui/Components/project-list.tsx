@@ -10,9 +10,7 @@ import { useTRPC } from "@/trpc/client";
 export const ProjectList = () => {
   const trpc = useTRPC();
 
-  const { data: projects, isLoading } = useQuery(
-    trpc.projects.getMany.queryOptions(),
-  );
+  const { data: projects } = useQuery(trpc.projects.getMany.queryOptions());
 
   return (
     <div className="w-full bg-white dark:bg-sidebar rounded-xl p-8 border flex flex-col gap-y-6 sm:gap-y-8">
