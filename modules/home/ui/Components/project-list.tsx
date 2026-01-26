@@ -15,55 +15,43 @@ export const ProjectList = () => {
   );
 
   return (
-    <section className="w-full border-t py-12 px-4">
-      <div className="mx-auto max-w-5xl">
-        <h2 className="mb-8 text-2xl font-bold">Saved Vibes</h2>
-
-        {isLoading && (
-          <p className="text-sm text-muted-foreground">Loading projects...</p>
-        )}
-
-        {!isLoading && projects?.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-4 py-20">
-            <Image
-              src="/empty-state.svg"
-              alt="No Projects"
-              width={150}
-              height={150}
-            />
-            <p className="text-center text-muted-foreground">
-              No projects yet. Create your first vibe ✨
-            </p>
+    <div className="w-full bg-white dark:bg-sidebar rounded-xl p-8 border flex flex-col gap-y-6 sm:gap-y-8">
+      <h2 className="text-2xl font-semibold">Previous Vibes</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {projects?.length === 0 && (
+          <div className="cols-span-4 text-center">
+            <p>No projects found. Create your first project!</p>
           </div>
         )}
-
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {projects?.map((project) => (
-            <Button
-              key={project.id}
-              asChild
-              variant="outline"
-              className="h-auto p-0 text-left"
-            >
-              <Link href={`/projects/${project.id}`}>
-                <div className="flex w-full flex-col gap-3 p-4">
-                  <div className="flex items-center gap-3">
-                    <Image src="/logo.svg" alt="Vibe" width={36} height={36} />
-                    <div className="flex flex-col">
-                      <span className="font-semibold">{project.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(project.createdAt), {
-                          addSuffix: true,
-                        })}
-                      </span>
-                    </div>
-                  </div>
+        {projects?.map((project) => (
+          <Button
+            key={project.id}
+            asChild
+            variant="outline"
+            className="font-normal h-auto justify-start h-20 w-full text-start  p-4"
+          >
+            <Link href={`/projects/${project.id}`} className="w-full">
+              <div className="flex items-center gap-4">
+                <Image
+                  src="/logo.svg"
+                  alt="Vibe Project"
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                />
+                <div className="flex flex-col ">
+                  <h3 className="truncate font-medium">{project.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {formatDistanceToNow(project.updatedAt, {
+                      addSuffix: true,
+                    })}
+                  </p>
                 </div>
-              </Link>
-            </Button>
-          ))}
-        </div>
+              </div>
+            </Link>
+          </Button>
+        ))}
       </div>
-    </section>
+    </div>
   );
 };
