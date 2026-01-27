@@ -14,11 +14,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model project{
-  id String @id @default(uuid())
-  name String
+model project {
+  id        String   @id @default(uuid())
+  name      String
+  userId    String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt 
+  updatedAt DateTime @updatedAt
 
   messages Message[]
 }
@@ -34,28 +35,28 @@ enum MessageType {
 }
 
 model Message {
-  id String @id @default(uuid())
-  content String
-  role MessageRole
-  type MessageType
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt 
+  id        String      @id @default(uuid())
+  content   String
+  role      MessageRole
+  type      MessageType
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   projectId String
-  project project @relation(fields: [projectId], references: [id],onDelete: Cascade )
+  project   project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   fragment Fragment?
 }
 
 model Fragment {
-  id String @id @default(uuid())
-  messageId String @unique
-  message Message @relation(fields: [messageId], references: [id],onDelete: Cascade )
+  id        String  @id @default(uuid())
+  messageId String  @unique
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   sandboxUrl String
-  title String
-  files Json 
+  title      String
+  files      Json
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt 
+  updatedAt DateTime @updatedAt
 }
