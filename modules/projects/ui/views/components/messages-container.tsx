@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { Fragment } from "@/app/generated/prisma";
 import { MessageLoading } from "./message-loading";
 import { MessageRole } from "@/app/generated/prisma";
+import { Assistant } from "next/font/google";
 
 interface Props {
   projectId: string;
@@ -19,7 +20,7 @@ export const MessagesContainer = ({
   setActiveFragment,
 }: Props) => {
   const bottomRef = useRef<HTMLDivElement>(null);
-  const lastAssistantMessageRef = useRef<string | null>(null);
+  const lastAssistantMessageIdRef = useRef<string | null>(null);
   const trpc = useTRPC();
   const { data: messages } = useSuspenseQuery(
     trpc.messages.getMany.queryOptions(
@@ -29,18 +30,18 @@ export const MessagesContainer = ({
       },
     ),
   );
-
+  // Track last assistant message to avoid unnecessary effects
   useEffect(() => {
-    const lastAssistantMessage = [...messages]
-      .reverse()
-      .find((msg) => msg.role === MessageRole.ASSISTANT);
+    const lastAssistantMessage = messages.findLast(
+      (message) => message.role === "ASSISTANT",
+    );
 
     if (
-      lastAssistantMessage &&
-      lastAssistantMessage.id !== lastAssistantMessageRef.current
+      lastAssistantMessage?.fragment &&
+      lastAssistantMessage.id !== lastAssistantMessageIdRef.current
     ) {
-      lastAssistantMessageRef.current = lastAssistantMessage.id;
-      setActiveFragment(lastAssistantMessage.fragment ?? null);
+      setActiveFragment(lastAssistantMessage.fragment);
+      lastAssistantMessageIdRef.current = lastAssistantMessage.id;
     }
   }, [messages, setActiveFragment]);
 
