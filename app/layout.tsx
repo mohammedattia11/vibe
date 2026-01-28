@@ -1,5 +1,6 @@
 import { TRPCReactProvider } from "@/trpc/client";
 import type { Metadata } from "next";
+import { ClerkProvider } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
@@ -26,6 +27,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+  <ClerkProvider
+    appearance={{
+      variables: {
+        colorPrimary: "#C96342",
+      },
+    }}
+  >
     <TRPCReactProvider>
       <html lang="en" suppressHydrationWarning>
         <body
@@ -43,5 +51,6 @@ export default function RootLayout({
         </body>
       </html>
     </TRPCReactProvider>
+  </ClerkProvider>
   );
 }

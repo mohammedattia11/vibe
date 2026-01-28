@@ -1,3 +1,4 @@
+"use client" 
 import { ProjectForm } from "@/modules/home/ui/Components/project-form";
 import { ProjectList } from "@/modules/home/ui/Components/project-list";
 import Image from "next/image";
