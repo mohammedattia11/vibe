@@ -5,7 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 const Page = () => {
   return (
-    <div className="relative h-screen w-full overflow-hidden">
+    <div className="relative min-h-screen w-full overflow-hidden p-4">
       <motion.div
         className="absolute h-96 w-96 rounded-full bg-gradient-to-r from-blue-500 to-slate-500 opacity-20 blur-3xl"
         animate={{
