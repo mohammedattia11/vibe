@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { Sandbox } from "@e2b/code-interpreter";
-import { createAgent, createNetwork, createTool, openai, type Tool } from "@inngest/agent-kit";
+import {
+  createAgent,
+  createNetwork,
+  createTool,
+  openai,
+  type Tool,
+} from "@inngest/agent-kit";
 import { PROMPT } from "@/prompt";
 import { inngest } from "./client";
 import { getsandbox, lastAssistantTextMessageContent } from "./utils";
@@ -23,12 +29,12 @@ export const codeAgentFunction = inngest.createFunction(
     const codeAgent = createAgent<AgentState>({
       name: "codeAgent",
       description: "An expert coding agent",
-      system: PROMPT ,
+      system: PROMPT,
       model: openai({
         model: "gpt-4o-mini",
         defaultParameters: {
-          temperature:0.1
-        }
+          temperature: 0.1,
+        },
       }),
       tools: [
         // Terminal tool
@@ -55,7 +61,7 @@ export const codeAgentFunction = inngest.createFunction(
                 return result.stdout;
               } catch (e) {
                 console.error(
-                  `Command failed: ${e} \nstdout: ${buffers.stdout}\nstderror: ${buffers.stderr}`
+                  `Command failed: ${e} \nstdout: ${buffers.stdout}\nstderror: ${buffers.stderr}`,
                 );
                 return `Command failed: ${e} \nstdout: ${buffers.stdout}\nstderror: ${buffers.stderr}`;
               }
@@ -71,12 +77,12 @@ export const codeAgentFunction = inngest.createFunction(
               z.object({
                 path: z.string(),
                 content: z.string(),
-              })
+              }),
             ),
           }),
           handler: async (
             { files },
-            { step, network }: Tool.Options<AgentState>
+            { step, network }: Tool.Options<AgentState>,
           ) => {
             const newFiles = await step?.run(
               "createOrUpdateFiles",
@@ -92,7 +98,7 @@ export const codeAgentFunction = inngest.createFunction(
                 } catch (e) {
                   return "Error: " + e;
                 }
-              }
+              },
             );
 
             if (typeof newFiles === "object") {
@@ -126,11 +132,11 @@ export const codeAgentFunction = inngest.createFunction(
       ],
       lifecycle: {
         onResponse: async ({ result, network }) => {
-          const lastAssistantMessageText = 
-          lastAssistantTextMessageContent(result);
-          if (lastAssistantMessageText && network){
-            if (lastAssistantMessageText.includes("<task_summary>")){
-              network.state.data.summary =lastAssistantMessageText;
+          const lastAssistantMessageText =
+            lastAssistantTextMessageContent(result);
+          if (lastAssistantMessageText && network) {
+            if (lastAssistantMessageText.includes("<task_summary>")) {
+              network.state.data.summary = lastAssistantMessageText;
             }
           }
           return result;
@@ -142,19 +148,19 @@ export const codeAgentFunction = inngest.createFunction(
       name: "coding-agent-network",
       agents: [codeAgent],
       maxIter: 10,
-      router:async ({network}) => {
-        const summary =network.state.data.summary;
-        if (summary){
-          return ;
+      router: async ({ network }) => {
+        const summary = network.state.data.summary;
+        if (summary) {
+          return;
         }
         return codeAgent;
       },
     });
 
     const result = await network.run(event.data.value);
-    const isError = 
-       !result.state.data.summary ||
-       Object.keys(result.state.data.files || {}).length ===0;
+    const isError =
+      !result.state.data.summary ||
+      Object.keys(result.state.data.files || {}).length === 0;
 
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
       const sandbox = await getsandbox(sandboxId);
@@ -190,11 +196,11 @@ export const codeAgentFunction = inngest.createFunction(
       });
     });
 
-    return { 
+    return {
       url: sandboxUrl,
       title: "Fragment",
       files: result.state.data.files,
       summary: result.state.data.summary,
     };
-  }
+  },
 );

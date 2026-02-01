@@ -10,14 +10,12 @@ import { useUser } from "@clerk/nextjs";
 
 export const ProjectList = () => {
   const trpc = useTRPC();
-  const {user} =useUser();
+  const { user } = useUser();
   const { data: projects } = useQuery(trpc.projects.getMany.queryOptions());
   if (!user) return null;
   return (
     <div className="w-full bg-white dark:bg-sidebar rounded-xl p-8 border flex flex-col gap-y-6 sm:gap-y-8">
-      <h2 className="text-2xl font-semibold">
-          {user?.firstName}&apos;s Vibes
-      </h2>
+      <h2 className="text-2xl font-semibold">{user?.firstName}&apos;s Vibes</h2>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {projects?.length === 0 && (
           <div className="cols-span-4 text-center">
@@ -33,13 +31,13 @@ export const ProjectList = () => {
           >
             <Link href={`/projects/${project.id}`} className="w-full">
               <div className="flex items-center gap-4">
-                <Image
+                {/*<Image
                   src="/logo.svg"
                   alt="Vibe Project"
                   width={32}
                   height={32}
                   className="object-contain"
-                />
+                />*/}
                 <div className="flex flex-col ">
                   <h3 className="truncate font-medium">{project.name}</h3>
                   <p className="text-sm text-muted-foreground">

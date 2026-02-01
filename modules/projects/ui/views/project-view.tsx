@@ -23,9 +23,8 @@ interface Props {
 }
 
 export const ProjectView = ({ projectId }: Props) => {
-
-  const { has } =useAuth();
-  const hasProAccess = has?.({plan: "pro"});
+  const { has } = useAuth();
+  const hasProAccess = has?.({ plan: "pro" });
 
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
   const [tabState, setTabState] = useState<"preview" | "Code">("preview");
@@ -85,11 +84,11 @@ export const ProjectView = ({ projectId }: Props) => {
               </TabsList>
               <div className="ml-auto flex items-center gap-x-2">
                 {!hasProAccess && (
-                <Button asChild size="sm" variant="default">
-                  <Link href="/pricing">
-                    <CrownIcon /> Upgrade
-                  </Link>
-                </Button>
+                  <Button asChild size="sm" variant="default">
+                    <Link href="/pricing">
+                      <CrownIcon /> Upgrade
+                    </Link>
+                  </Button>
                 )}
                 <UserControl />
               </div>
