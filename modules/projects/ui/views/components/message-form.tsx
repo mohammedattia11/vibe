@@ -5,7 +5,7 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import TextareaAutosize from "react-textarea-autosize";
 import { ArrowUpIcon, Loader2Icon } from "lucide-react";
-import { useMutation, useQueryClient , useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useTRPC } from "@/trpc/client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -45,17 +45,16 @@ export const MessageForm = ({ projectId }: Props) => {
         queryClient.invalidateQueries(
           trpc.messages.getMany.queryOptions({ projectId }),
         );
-        queryClient.invalidateQueries(
-          trpc.usage.status.queryOptions(),
-        );
+        queryClient.invalidateQueries(trpc.usage.status.queryOptions());
       },
       onError: (error) => {
         toast.error(error.message);
-        if(error.data?.code === "TOO_MANY_REQUESTS"){
+        if (error.data?.code === "TOO_MANY_REQUESTS") {
           router.push("/pricing");
-      }
-    },
-}));
+        }
+      },
+    }),
+  );
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     await createMessage.mutateAsync({
@@ -72,7 +71,7 @@ export const MessageForm = ({ projectId }: Props) => {
   return (
     <Form {...form}>
       {showUsage && (
-        <Usage 
+        <Usage
           points={usage.remainingPoints}
           msBeforeNext={usage.msBeforeNext}
         />

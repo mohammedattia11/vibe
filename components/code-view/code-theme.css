@@ -1,10 +1,8 @@
-
-/* Prism.js GitHub Dark Theme */
+/* Code Theme Matching globals.css Color Palette */
 
 code[class*='language-'],
 pre[class*='language-'] {
-  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono',
-    'Droid Sans Mono', 'Source Code Pro', monospace;
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
   text-align: left;
   white-space: pre;
   word-spacing: normal;
@@ -15,20 +13,23 @@ pre[class*='language-'] {
   hyphens: none;
 }
 
+/* Light Mode Theme */
 code[class*='language-'],
 pre[class*='language-'] {
-  color: #24292e;
+  color: oklch(0.1884 0.0128 248.5103); /* foreground */
+  background: oklch(0.9784 0.0011 197.1387); /* card */
 }
 
 .token.comment,
 .token.prolog,
 .token.doctype,
 .token.cdata {
-  color: #6a737d;
+  color: oklch(0.5637 0.0078 247.9662); /* muted-foreground from dark, works well for comments */
+  font-style: italic;
 }
 
 .token.punctuation {
-  color: #24292e;
+  color: oklch(0.1884 0.0128 248.5103); /* foreground */
 }
 
 .token.namespace {
@@ -41,7 +42,7 @@ pre[class*='language-'] {
 .token.number,
 .token.constant,
 .token.symbol {
-  color: #005cc5;
+  color: oklch(0.6723 0.1606 244.9955); /* primary/chart-1 */
 }
 
 .token.selector,
@@ -49,7 +50,7 @@ pre[class*='language-'] {
 .token.string,
 .token.char,
 .token.builtin {
-  color: #032f62;
+  color: oklch(0.6907 0.1554 160.3454); /* chart-2 - green tone */
 }
 
 .token.operator,
@@ -57,25 +58,25 @@ pre[class*='language-'] {
 .token.url,
 .language-css .token.string,
 .style .token.string {
-  color: #d73a49;
+  color: oklch(0.1884 0.0128 248.5103); /* foreground */
   background: transparent;
 }
 
 .token.atrule,
 .token.attr-value,
 .token.keyword {
-  color: #d73a49;
+  color: oklch(0.5919 0.2186 10.5826); /* chart-5 - red/pink tone */
 }
 
 .token.function,
 .token.class-name {
-  color: #6f42c1;
+  color: oklch(0.6723 0.1606 244.9955); /* primary */
 }
 
 .token.regex,
 .token.important,
 .token.variable {
-  color: #e36209;
+  color: oklch(0.8214 0.16 82.5337); /* chart-3 - yellow tone */
 }
 
 .token.important,
@@ -91,21 +92,31 @@ pre[class*='language-'] {
   cursor: help;
 }
 
-/* Dark */
+.token.deleted {
+  color: oklch(0.6188 0.2376 25.7658); /* destructive */
+}
+
+.token.inserted {
+  color: oklch(0.6907 0.1554 160.3454); /* chart-2 */
+}
+
+/* Dark Mode Theme */
 .dark code[class*='language-'],
 .dark pre[class*='language-'] {
-  color: #e1e4e8;
+  color: oklch(0.9328 0.0025 228.7857); /* dark foreground */
+  background: oklch(0.2097 0.008 274.5332); /* dark card */
 }
 
 .dark .token.comment,
 .dark .token.prolog,
 .dark .token.doctype,
 .dark .token.cdata {
-  color: #6a737d; /* comment */
+  color: oklch(0.5637 0.0078 247.9662); /* dark muted-foreground */
+  font-style: italic;
 }
 
 .dark .token.punctuation {
-  color: #e1e4e8; /* editor.foreground */
+  color: oklch(0.8853 0 0); /* dark card-foreground */
 }
 
 .dark .token.namespace {
@@ -119,7 +130,7 @@ pre[class*='language-'] {
 .dark .token.constant,
 .dark .token.symbol,
 .dark .token.deleted {
-  color: #79b8ff; /* constant, entity.name.constant, variable.other.constant */
+  color: oklch(0.6723 0.1606 244.9955); /* chart-1/primary - consistent across themes */
 }
 
 .dark .token.selector,
@@ -128,7 +139,7 @@ pre[class*='language-'] {
 .dark .token.char,
 .dark .token.builtin,
 .dark .token.inserted {
-  color: #9ecbff; /* string */
+  color: oklch(0.6907 0.1554 160.3454); /* chart-2 - green tone */
 }
 
 .dark .token.operator,
@@ -136,24 +147,24 @@ pre[class*='language-'] {
 .dark .token.url,
 .dark .language-css .token.string,
 .dark .style .token.string {
-  color: #e1e4e8; /* editor.foreground */
+  color: oklch(0.9328 0.0025 228.7857); /* dark foreground */
 }
 
 .dark .token.atrule,
 .dark .token.attr-value,
 .dark .token.keyword {
-  color: #f97583; /* keyword */
+  color: oklch(0.5919 0.2186 10.5826); /* chart-5 - red/pink tone */
 }
 
 .dark .token.function,
 .dark .token.class-name {
-  color: #b392f0; /* entity, entity.name */
+  color: oklch(0.6692 0.1607 245.011); /* dark primary */
 }
 
 .dark .token.regex,
 .dark .token.important,
 .dark .token.variable {
-  color: #ffab70; /* variable */
+  color: oklch(0.8214 0.16 82.5337); /* chart-3 - yellow tone */
 }
 
 .dark .token.important,

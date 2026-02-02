@@ -9,7 +9,7 @@ export async function getsandbox(sandboxId: string) {
 
 export function lastAssistantTextMessageContent(result: AgentResult) {
   const lastAssistantTextMessageIndex = result.output.findLastIndex(
-    (message) => message.role === "assistant",
+    message => message.role === "assistant"
   );
   const message = result.output[lastAssistantTextMessageIndex] as
     | TextMessage
@@ -18,7 +18,7 @@ export function lastAssistantTextMessageContent(result: AgentResult) {
   return message?.content
     ? typeof message.content === "string"
       ? message.content
-      : message.content.map((c) => c.text).join("")
+      : message.content.map(c => c.text).join("")
     : undefined;
 }
 
@@ -28,7 +28,7 @@ export const parseAgentOutput = (value: Message[]) => {
     return "Fragment";
   }
   if (Array.isArray(output.content)) {
-    return output.content.map((txt) => txt).join("");
+    return output.content.map(txt => txt).join("");
   } else {
     return output.content;
   }
