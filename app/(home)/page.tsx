@@ -1,34 +1,94 @@
-"use client" 
+"use client";
 import { ProjectForm } from "@/modules/home/ui/Components/project-form";
 import { ProjectList } from "@/modules/home/ui/Components/project-list";
-import Image from "next/image";
-const Page = () => {
-  return (
-    <div className="flex flex-col max-w-5xl mx-auto w-full">
-      <section className="space-y-6 py-[16vh] 2xl:py-48">
-        <div className="flex flex-col items-center">
-          <Image
-            src="/logo.svg"
-            alt="Vibe"
-            width={50}
-            height={50}
-            className="hidden md:block"
-          />
-        </div>
+import { motion } from "framer-motion";
+import HeroText from "@/feature/hero/components/hero-text";
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
+import { sectionVariants } from "@/feature/hero/constants/section-variant";
 
-        <h1 className="text-2xl md:text-5xl font-bold text-center ">
-          Build something with Vibe
-        </h1>
-        <p className="text-lg  md:text-xl text-muted-foreground text-center ">
-          Vibe is a free and open source component library for building modern
-          web applications.
-        </p>
-        <div className="max-w-3xl mx-auto w-full">
-          <ProjectForm />
-        </div>
-      </section>
-      <ProjectList />
+const HomePage = () => {
+  const trpc = useTRPC();
+  const { data: projects } = useQuery(trpc.projects.getMany.queryOptions());
+  return (
+    <div className="relative min-h-screen overflow-hidden px-2">
+      <motion.div
+        className="absolute h-96 w-96 rounded-full bg-linear-to-r from-blue-500 to-slate-500 opacity-20 blur-3xl"
+        animate={{
+          x: [0, 100, 0],
+          y: [0, 50, 0],
+          scale: [1, 1.2, 1],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        style={{ top: "10%", left: "10%" }}
+      />
+      <motion.div
+        className="absolute h-96 w-96 rounded-full bg-linear-to-r from-pink-500 to-red-500 opacity-20 blur-3xl"
+        animate={{
+          x: [0, -100, 0],
+          y: [0, -50, 0],
+          scale: [1, 1.3, 1],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        style={{ bottom: "10%", right: "10%" }}
+      />
+      <motion.div
+        className="absolute h-96 w-96 rounded-full bg-linear-to-r from-green-500 to-cyan-500 opacity-20 blur-3xl"
+        animate={{
+          x: [0, 50, 0],
+          y: [0, -100, 0],
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 12,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        style={{ top: "50%", left: "50%" }}
+      />
+      <div className="flex flex-col max-w-5xl mx-auto w-full">
+        <motion.section
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={sectionVariants}
+          className="space-y-6 py-[16vh] 2xl:py-48"
+        >
+          {/*<div className="flex flex-col items-center">
+            <Image
+              src="/logo.svg"
+              alt="Vibe"
+              width={50}
+              height={50}
+              className="hidden md:block"
+            />
+          </div>*/}
+
+          <HeroText />
+          <div className="max-w-3xl mx-auto w-full">
+            <ProjectForm />
+          </div>
+        </motion.section>
+        {projects && projects?.length > 0 && (
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={sectionVariants}
+          >
+            <ProjectList projects={projects} />
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 };
-export default Page;
+export default HomePage;

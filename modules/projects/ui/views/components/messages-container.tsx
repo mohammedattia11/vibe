@@ -6,8 +6,6 @@ import { MessageForm } from "./message-form";
 import { useEffect } from "react";
 import { Fragment } from "@/app/generated/prisma";
 import { MessageLoading } from "./message-loading";
-import { MessageRole } from "@/app/generated/prisma";
-import { Assistant } from "next/font/google";
 
 interface Props {
   projectId: string;
