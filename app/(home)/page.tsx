@@ -11,7 +11,7 @@ const HomePage = () => {
   const trpc = useTRPC();
   const { data: projects } = useQuery(trpc.projects.getMany.queryOptions());
   return (
-    <div className="relative">
+    <div className="relative min-h-screen overflow-hidden px-2">
       <motion.div
         className="absolute h-96 w-96 rounded-full bg-linear-to-r from-blue-500 to-slate-500 opacity-20 blur-3xl"
         animate={{

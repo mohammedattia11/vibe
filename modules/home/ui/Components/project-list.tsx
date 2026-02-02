@@ -11,7 +11,6 @@ type ProjectListProps = {
 };
 
 export const ProjectList = ({ projects }: ProjectListProps) => {
-  console.log(projects);
   const { user } = useUser();
   if (!user) return null;
   return (
