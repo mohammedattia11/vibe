@@ -4,8 +4,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { useUser } from "@clerk/nextjs";
+import { ProjectTypes } from "@/types";
 
-export const ProjectList = ({ projects }) => {
+type ProjectListProps = {
+  projects: ProjectTypes[];
+};
+
+export const ProjectList = ({ projects }: ProjectListProps) => {
   console.log(projects);
   const { user } = useUser();
   if (!user) return null;
