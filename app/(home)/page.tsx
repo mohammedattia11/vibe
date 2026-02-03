@@ -6,6 +6,7 @@ import { ProjectList } from "@/modules/home/ui/Components/project-list";
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const HomePage = () => {
   const trpc = useTRPC();
@@ -62,7 +63,13 @@ const HomePage = () => {
           variants={sectionVariants}
           className="space-y-6 py-[16vh] 2xl:py-48"
         >
-          {/* <div className="flex flex-col items-center">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={sectionVariants}
+            className="flex flex-col items-center"
+          >
             <Image
               src="/logo.png"
               alt="Vibe"
@@ -70,7 +77,7 @@ const HomePage = () => {
               height={100}
               className="hidden md:block"
             />
-          </div> */}
+          </motion.div>
 
           <HeroText />
           <div className="max-w-3xl mx-auto w-full">
