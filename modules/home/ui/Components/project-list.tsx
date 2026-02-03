@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from "date-fns";
-import { useUser } from "@clerk/nextjs";
 import { ProjectTypes } from "@/types";
+import { useUser } from "@clerk/nextjs";
+import { formatDistanceToNow } from "date-fns";
+import Image from "next/image";
+import Link from "next/link";
 
 type ProjectListProps = {
   projects: ProjectTypes[];
@@ -22,7 +23,7 @@ export const ProjectList = ({ projects }: ProjectListProps) => {
             <p>No projects found. Create your first project!</p>
           </div>
         )}
-        {projects?.map((project) => (
+        {projects?.map(project => (
           <Button
             key={project.id}
             asChild
@@ -31,13 +32,13 @@ export const ProjectList = ({ projects }: ProjectListProps) => {
           >
             <Link href={`/projects/${project.id}`} className="w-full">
               <div className="flex items-center gap-4">
-                {/*<Image
-                  src="/logo.svg"
+                <Image
+                  src="/logo.png"
                   alt="Vibe Project"
                   width={32}
                   height={32}
                   className="object-contain"
-                />*/}
+                />
                 <div className="flex flex-col ">
                   <h3 className="truncate font-medium">{project.name}</h3>
                   <p className="text-sm text-muted-foreground">

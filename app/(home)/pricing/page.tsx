@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
+import { useCurrentTheme } from "@/hooks/use-current-theme";
 import { PricingTable } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
-import { useCurrentTheme } from "@/hooks/use-current-theme";
+import Image from "next/image";
 
 const Page = () => {
   const currentTheme = useCurrentTheme();
@@ -13,10 +13,10 @@ const Page = () => {
       <section className="space-y-6 pt-[16vh] 2xl:pt-48">
         <div className="flex flex-col items-center">
           <Image
-            src="/logo.svg"
+            src="/logo.png"
             alt="Vibe"
-            width={50}
-            height={50}
+            width={80}
+            height={80}
             className="hidden md:block"
           />
         </div>

@@ -1,11 +1,11 @@
 "use client";
+import HeroText from "@/feature/hero/components/hero-text";
+import { sectionVariants } from "@/feature/hero/constants/section-variant";
 import { ProjectForm } from "@/modules/home/ui/Components/project-form";
 import { ProjectList } from "@/modules/home/ui/Components/project-list";
-import { motion } from "framer-motion";
-import HeroText from "@/feature/hero/components/hero-text";
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
-import { sectionVariants } from "@/feature/hero/constants/section-variant";
+import { motion } from "framer-motion";
 
 const HomePage = () => {
   const trpc = useTRPC();
@@ -62,15 +62,15 @@ const HomePage = () => {
           variants={sectionVariants}
           className="space-y-6 py-[16vh] 2xl:py-48"
         >
-          {/*<div className="flex flex-col items-center">
+          {/* <div className="flex flex-col items-center">
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="Vibe"
-              width={50}
-              height={50}
+              width={100}
+              height={100}
               className="hidden md:block"
             />
-          </div>*/}
+          </div> */}
 
           <HeroText />
           <div className="max-w-3xl mx-auto w-full">

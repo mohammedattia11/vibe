@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const ShimmerMessages = () => {
   const messages = [
@@ -17,7 +17,7 @@ const ShimmerMessages = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentMessageIndex((prev) => (prev + 1) % messages.length);
+      setCurrentMessageIndex(prev => (prev + 1) % messages.length);
     }, 2000);
 
     return () => clearInterval(interval);
@@ -37,10 +37,10 @@ export const MessageLoading = () => {
     <div className="flex flex-col group px-2 pb-2">
       <div className="flex items-center gap-2 pl-2 mb-2">
         <Image
-          src="/logo.svg"
+          src="/logo.png"
           alt="Vibe"
-          width={18}
-          height={18}
+          width={25}
+          height={25}
           className="shrink-0"
         />
         <span className="text-sm font-medium">Vibe</span>
