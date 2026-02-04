@@ -16,8 +16,8 @@ export const ProjectList = ({ projects }: ProjectListProps) => {
   if (!user) return null;
   return (
     <div className="dark:bg-sidebar flex w-full flex-col gap-y-6 rounded-xl border bg-white p-8 sm:gap-y-8">
-      <h2 className="text-2xl font-semibold">{user?.firstName}&apos;s Vibes</h2>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+      <h2 className="text-2xl font-semibold tracking-wide">{user?.firstName}&apos;s Vibes</h2>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
         {projects?.length === 0 && (
           <div className="cols-span-4 text-center">
             <p>No projects found. Create your first project!</p>
@@ -40,7 +40,7 @@ export const ProjectList = ({ projects }: ProjectListProps) => {
                   className="object-contain"
                 />
                 <div className="flex flex-col">
-                  <h3 className="truncate font-medium">{project.name}</h3>
+                  <h3 className="text-lg tracking-wide">{project.name}</h3>
                   <p className="text-muted-foreground text-sm">
                     {formatDistanceToNow(project.updatedAt, {
                       addSuffix: true,

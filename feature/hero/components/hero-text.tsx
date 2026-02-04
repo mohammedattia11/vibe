@@ -4,44 +4,33 @@ import { motion } from "framer-motion";
 import { containerVariants, wordVariants } from "../constants/text-variants";
 
 export default function HeroText() {
-  const title = "Build something with vibe";
+  const title = "From imagination to implementation";
   const description =
-    "Vibe is a free and open source component library for building modern web applications.";
-
+    "Vibe turns your ideas into fully working web apps. Just write a prompt and get your application in minutes.";
   const titleWords = title.split(" ");
   const descriptionWords = description.split(" ");
 
   return (
     <div className="space-y-4">
       <motion.h1
-        className="text-2xl md:text-5xl font-bold text-center"
+        className="text-center text-2xl font-bold sm:text-4xl md:text-5xl text-zinc-300"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        {titleWords.map((word, index) =>
-          word === "vibe" ? (
-            <motion.span
-              key={index}
-              variants={wordVariants}
-              className="inline-block mr-2 bg-linear-to-r from-blue-400 to-blue-700 text-transparent bg-clip-text"
-            >
-              {word}
-            </motion.span>
-          ) : (
-            <motion.span
-              key={index}
-              variants={wordVariants}
-              className="inline-block mr-2"
-            >
-              {word}
-            </motion.span>
-          ),
-        )}
+        {titleWords.map((word, index) => (
+          <motion.span
+            key={index}
+            variants={wordVariants}
+            className="mr-1 md:mr-2 inline-block"
+          >
+            {word}
+          </motion.span>
+        ))}
       </motion.h1>
 
       <motion.p
-        className="text-lg md:text-xl text-muted-foreground text-center"
+        className="text-muted-foreground text-center text-xs sm:text-base md:text-lg"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -50,7 +39,7 @@ export default function HeroText() {
           <motion.span
             key={index}
             variants={wordVariants}
-            className="inline-block mr-1"
+            className="mr-1 inline-block"
           >
             {word}
           </motion.span>

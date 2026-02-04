@@ -95,7 +95,7 @@ export const MessageForm = ({ projectId }: Props) => {
               onBlur={() => setIsFocused(false)}
               minRows={2}
               maxRows={8}
-              className="pt-4 resize-none border-none w-full outline-none bg-transparent"
+              className="pt-4 resize-none border-none w-full outline-none bg-transparent font-body"
               placeholder="What Would You Like To Build?"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
