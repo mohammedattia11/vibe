@@ -1,5 +1,6 @@
 "use client";
 
+import { ToggleThemeButton } from "@/components/toggle-theme-button";
 import { Button } from "@/components/ui/button";
 import { UserControl } from "@/components/user-control";
 import { useScroll } from "@/hooks/use-scroll";
@@ -24,6 +25,7 @@ export const Navbar = () => {
           <span className="font-bold text-xl">ibe</span>
         </Link>
         {/* Visible when signed out */}
+        <div className="flex items-center gap-2">
         <SignedOut>
           <div className="flex gap-2">
             <SignUpButton>
@@ -40,6 +42,8 @@ export const Navbar = () => {
         <SignedIn>
           <UserControl showName />
         </SignedIn>
+        <ToggleThemeButton />
+        </div>
       </div>
     </nav>
   );
