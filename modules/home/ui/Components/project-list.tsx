@@ -15,20 +15,20 @@ export const ProjectList = ({ projects }: ProjectListProps) => {
   const { user } = useUser();
   if (!user) return null;
   return (
-    <div className="w-full bg-white dark:bg-sidebar rounded-xl p-8 border flex flex-col gap-y-6 sm:gap-y-8">
+    <div className="dark:bg-sidebar flex w-full flex-col gap-y-6 rounded-xl border bg-white p-8 sm:gap-y-8">
       <h2 className="text-2xl font-semibold">{user?.firstName}&apos;s Vibes</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {projects?.length === 0 && (
           <div className="cols-span-4 text-center">
             <p>No projects found. Create your first project!</p>
           </div>
         )}
-        {projects?.map(project => (
+        {projects?.map((project) => (
           <Button
             key={project.id}
             asChild
             variant="outline"
-            className="font-normal h-auto justify-start h-20 w-full text-start  p-4"
+            className="h-20 h-auto w-full justify-start p-4 text-start font-normal"
           >
             <Link href={`/projects/${project.id}`} className="w-full">
               <div className="flex items-center gap-4">
@@ -39,9 +39,9 @@ export const ProjectList = ({ projects }: ProjectListProps) => {
                   height={32}
                   className="object-contain"
                 />
-                <div className="flex flex-col ">
+                <div className="flex flex-col">
                   <h3 className="truncate font-medium">{project.name}</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {formatDistanceToNow(project.updatedAt, {
                       addSuffix: true,
                     })}

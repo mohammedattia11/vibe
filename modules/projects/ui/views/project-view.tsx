@@ -1,22 +1,22 @@
 "use client";
 
+import { FileExplorer } from "@/components/file-explorer";
+import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { MessagesContainer } from "./components/messages-container";
-import { Suspense, useState } from "react";
-import { ProjectHeader } from "./components/project-header";
-import { FragmentWeb } from "./components/Fragment-web";
-import type { Fragment } from "./components/Fragment-web";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EyeIcon, CodeIcon, CrownIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { FileExplorer } from "@/components/file-explorer";
 import { UserControl } from "@/components/user-control";
 import { useAuth } from "@clerk/nextjs";
+import { CodeIcon, CrownIcon, EyeIcon } from "lucide-react";
+import Link from "next/link";
+import { Suspense, useState } from "react";
+import type { Fragment } from "./components/Fragment-web";
+import { FragmentWeb } from "./components/Fragment-web";
+import { MessagesContainer } from "./components/messages-container";
+import { ProjectHeader } from "./components/project-header";
 
 interface Props {
   projectId: string;
@@ -30,17 +30,17 @@ export const ProjectView = ({ projectId }: Props) => {
   const [tabState, setTabState] = useState<"preview" | "Code">("preview");
 
   return (
-    <div className="h-screen bg-background">
+    <div className="bg-background h-screen">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         {/* LEFT PANEL */}
         <ResizablePanel
           defaultSize={45}
           minSize={20}
-          className="flex flex-col border-r bg-muted/30"
+          className="bg-muted/30 flex flex-col border-r"
         >
           <Suspense
             fallback={
-              <p className="p-4 text-sm text-muted-foreground">
+              <p className="text-muted-foreground p-4 text-sm">
                 Loading project...
               </p>
             }
@@ -50,7 +50,7 @@ export const ProjectView = ({ projectId }: Props) => {
 
           <Suspense
             fallback={
-              <p className="p-4 text-sm text-muted-foreground">
+              <p className="text-muted-foreground p-4 text-sm">
                 Loading messages...
               </p>
             }
@@ -73,8 +73,8 @@ export const ProjectView = ({ projectId }: Props) => {
             onValueChange={(value) => setTabState(value as "preview" | "Code")}
             className="h-full gap-y-0"
           >
-            <div className="w-full flex items-center p-2 border-b gap-x-2">
-              <TabsList className="h-8 p-0 border rounded-md">
+            <div className="flex w-full items-center gap-x-2 border-b p-2">
+              <TabsList className="h-8 rounded-md border p-0">
                 <TabsTrigger value="preview" className="rounded-md">
                   <EyeIcon /> <span>Demo</span>
                 </TabsTrigger>

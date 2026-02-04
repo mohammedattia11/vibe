@@ -55,13 +55,13 @@ const HomePage = () => {
         }}
         style={{ top: "50%", left: "50%" }}
       />
-      <div className="flex flex-col max-w-5xl mx-auto w-full">
+      <div className="mx-auto flex w-full max-w-5xl flex-col">
         <motion.section
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={sectionVariants}
-          className="space-y-6 py-[16vh] 2xl:py-48"
+          className="space-y-6 py-[16vh] xl:py-32"
         >
           <motion.div
             initial="hidden"
@@ -80,7 +80,7 @@ const HomePage = () => {
           </motion.div>
 
           <HeroText />
-          <div className="max-w-3xl mx-auto w-full">
+          <div className="mx-auto w-full max-w-3xl">
             <ProjectForm />
           </div>
         </motion.section>

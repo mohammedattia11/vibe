@@ -6,9 +6,9 @@ interface Props {
 
 const Layout = ({ children }: Props) => {
   return (
-    <main className=" flex flex-col min-h-screen">
+    <main className="flex min-h-screen flex-col">
       <Navbar />
-      <div className="w-full flex-1 flex flex-col justify-center">
+      <div className="flex w-full flex-1 flex-col justify-center">
         {children}
       </div>
     </main>
