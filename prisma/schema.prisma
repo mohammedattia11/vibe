@@ -16,6 +16,7 @@ datasource db {
 
 model project {
   id        String   @id @default(uuid())
+  githubUrl String?
   name      String
   userId    String
   createdAt DateTime @default(now())
@@ -62,7 +63,7 @@ model Fragment {
 }
 
 model Usage {
-  key String @id
+  key    String    @id
   points Int
   expire DateTime?
 }

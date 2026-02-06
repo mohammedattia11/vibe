@@ -9,14 +9,17 @@ import {
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserControl } from "@/components/user-control";
-import { useAuth } from "@clerk/nextjs";
-import { CodeIcon, CrownIcon, EyeIcon } from "lucide-react";
+import { useAuth, useClerk } from "@clerk/nextjs";
+import { CodeIcon, CrownIcon, EyeIcon, GithubIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import type { Fragment } from "./components/Fragment-web";
 import { FragmentWeb } from "./components/Fragment-web";
 import { MessagesContainer } from "./components/messages-container";
 import { ProjectHeader } from "./components/project-header";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface Props {
   projectId: string;
@@ -24,10 +27,64 @@ interface Props {
 
 export const ProjectView = ({ projectId }: Props) => {
   const { has } = useAuth();
+  const clerk = useClerk();
+  const trpc = useTRPC();
   const hasProAccess = has?.({ plan: "pro" });
 
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
-  const [tabState, setTabState] = useState<"preview" | "Code">("preview");
+  const [tabState, setTabState] = useState<"preview" | "code">("preview");
+
+  // function =responsible for connecting the user's GitHub account via Clerk OAuth
+  const handleGithubAuth = async () => {
+    try {
+      // Get the currently logged in clerk user
+      const user = clerk.user;
+      if (!user) return;
+      // Clerk returns a redirect URL to GitHub's authorization page
+      const account = await user.createExternalAccount({
+        strategy: "oauth_github",
+        redirectUrl: window.location.href, // Return to the same page after auth
+      });
+      // Redirect the user to GitHub to approve access
+      const redirectURL = account.verification?.externalVerificationRedirectURL;  
+      if (redirectURL) {
+        window.location.href = redirectURL.href;
+      }
+    } catch (err: any) {
+      if (err.errors?.[0]?.code === "verification_required") {
+        toast.info("Please confirm your identity in the profile settings.");
+        await clerk.openUserProfile();
+      }
+    }
+  };
+
+  const publishToGithub = useMutation(
+    trpc.projects.publishToGithub.mutationOptions({
+    onSuccess: (data) => {
+      toast.success("Successfully synced with GitHub!");
+      window.open(data.url, "_blank");
+    },
+    onError: (error) => {
+      if (error.message.includes("not linked") || error.message.includes("UNAUTHORIZED")) {
+        toast.info("Connecting your GitHub account... Please wait.");
+        handleGithubAuth();  
+      } else {
+        toast.error(error.message);
+      }
+    },
+  })
+  );
+
+  const onPublishClick = () => {
+    // Make sure there are files to publish
+    if (!activeFragment) return;
+    
+    publishToGithub.mutate({
+      projectId,
+      repoName: `ai-gen-${projectId.slice(0, 8)}`, 
+      files: activeFragment.files as Record<string, string>,
+    });
+  };
 
   return (
     <div className="bg-background h-screen">
@@ -65,42 +122,58 @@ export const ProjectView = ({ projectId }: Props) => {
 
         <ResizableHandle className="hover:bg-primary transition-colors" />
 
-        {/* RIGHT PANEL */}
+        {/* RIGHT PANEL: Preview & Code */}
         <ResizablePanel defaultSize={65} minSize={50}>
           <Tabs
             value={tabState}
-            defaultValue="preview"
-            onValueChange={(value) => setTabState(value as "preview" | "Code")}
+            onValueChange={(value) => setTabState(value as "preview" | "code")}
             className="h-full gap-y-0"
           >
             <div className="flex w-full items-center gap-x-2 border-b p-2">
               <TabsList className="h-8 rounded-md border p-0">
                 <TabsTrigger value="preview" className="rounded-md">
-                  <EyeIcon /> <span>Demo</span>
+                  <EyeIcon className="size-4 mr-1" /> Demo
                 </TabsTrigger>
                 <TabsTrigger value="code" className="rounded-md">
-                  <CodeIcon /> <span>Code</span>
+                  <CodeIcon className="size-4 mr-1" /> Code
                 </TabsTrigger>
               </TabsList>
+
+              {/* GitHub Publish/Update Button */}
+              {activeFragment && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-x-2 h-8"
+                  disabled={publishToGithub.isPending}
+                  onClick={onPublishClick}
+                >
+                  {publishToGithub.isPending ? (
+                    <Loader2Icon className="size-4 animate-spin" />
+                  ) : (
+                    <GithubIcon className="size-4" />
+                  )}
+                  {publishToGithub.isPending ? "Updating GitHub..." : "Sync to GitHub"}
+                </Button>
+              )}
+
               <div className="ml-auto flex items-center gap-x-2">
                 {!hasProAccess && (
                   <Button asChild size="sm" variant="default">
-                    <Link href="/pricing">
-                      <CrownIcon /> Upgrade
-                    </Link>
+                    <Link href="/pricing"><CrownIcon className="size-4 mr-1" /> Upgrade</Link>
                   </Button>
                 )}
                 <UserControl />
               </div>
             </div>
-            <TabsContent value="preview">
+            
+            <TabsContent value="preview" className="m-0 h-[calc(100%-49px)]">
               {!!activeFragment && <FragmentWeb data={activeFragment} />}
             </TabsContent>
-            <TabsContent value="code" className="min-h-0">
+            
+            <TabsContent value="code" className="m-0 h-[calc(100%-49px)] overflow-hidden">
               {!!activeFragment?.files && (
-                <FileExplorer
-                  files={activeFragment.files as { [path: string]: string }}
-                />
+                <FileExplorer files={activeFragment.files as { [path: string]: string }} />
               )}
             </TabsContent>
           </Tabs>
