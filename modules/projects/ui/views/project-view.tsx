@@ -33,6 +33,13 @@ export const ProjectView = ({ projectId }: Props) => {
 
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
   const [tabState, setTabState] = useState<"preview" | "code">("preview");
+   
+
+  const isGithubLinked =
+  !!clerk.user &&
+  clerk.user.externalAccounts.some( //is there atleast one account for github in user`s externalAccounts in clerk
+    (acc) => acc.provider === "github" 
+  );
 
   // function =responsible for connecting the user's GitHub account via Clerk OAuth
   const handleGithubAuth = async () => {
@@ -50,10 +57,16 @@ export const ProjectView = ({ projectId }: Props) => {
       if (redirectURL) {
         window.location.href = redirectURL.href;
       }
-    } catch (err: any) {
-      if (err.errors?.[0]?.code === "verification_required") {
+    } catch (err: unknown) {
+      if (err instanceof Error){
+        if (err.message.includes("verification_required")) {
         toast.info("Please confirm your identity in the profile settings.");
-        await clerk.openUserProfile();
+      } else {
+        toast.error(err.message);
+      }
+      } else {
+        console.error("Unexpected error:", err);
+        toast.error("An unexpected error occurred");
       }
     }
   };
@@ -138,25 +151,30 @@ export const ProjectView = ({ projectId }: Props) => {
                   <CodeIcon className="size-4 mr-1" /> Code
                 </TabsTrigger>
               </TabsList>
-
-              {/* GitHub Publish/Update Button */}
               {activeFragment && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-x-2 h-8"
-                  disabled={publishToGithub.isPending}
-                  onClick={onPublishClick}
+                <Button 
+                variant="outline" size="sm" className="gap-x-2 h-8"
+                disabled={publishToGithub.isPending}
+                onClick={() => {
+                  if (!isGithubLinked) {
+                    handleGithubAuth(); // not linked =>authorize
+                  } else {
+                    onPublishClick(); // linked => so publish
+                    }
+                  }
+                }
                 >
-                  {publishToGithub.isPending ? (
-                    <Loader2Icon className="size-4 animate-spin" />
-                  ) : (
-                    <GithubIcon className="size-4" />
-                  )}
-                  {publishToGithub.isPending ? "Updating GitHub..." : "Sync to GitHub"}
-                </Button>
-              )}
-
+                  {publishToGithub.isPending ?
+                   (<Loader2Icon className="size-4 animate-spin" /> ) :
+                    (<GithubIcon className="size-4" />)
+                    }
+                    {!isGithubLinked?
+                     "Connect GitHub":
+                      publishToGithub.isPending? 
+                      "Updating GitHub...":
+                       "Publish to GitHub"}
+                       </Button>
+                      )}
               <div className="ml-auto flex items-center gap-x-2">
                 {!hasProAccess && (
                   <Button asChild size="sm" variant="default">

@@ -95,8 +95,12 @@ export const projectsRouter = createTRPCRouter({
             if (!Array.isArray(existingFile)) {
               sha = existingFile.sha;
             }
-          } catch (e) {
-            console.log(e.message)
+          } catch (e: unknown) {
+            if (e instanceof Error) {
+              console.log(e.message); 
+            } else {
+              console.log("Unknown error:", e); 
+            }
           }
 
           //publish 
@@ -111,14 +115,24 @@ export const projectsRouter = createTRPCRouter({
         }
         return { url: `https://github.com/${owner}/${repoName}` };
 
-      } catch (error: any) {
-        console.error("GitHub Error:", error);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error("GitHub Error:", error);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: error.message,
+          }
+        );
+      } else {
+        console.error("Unexpected GitHub Error:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: error.message || "Failed to sync with GitHub",
-        });
-      }
-    }),
+          message: "Failed to sync with GitHub",
+        }
+      );
+    }
+  }
+}),
   create: protectedProcedure
     .input(
       z.object({
