@@ -1,5 +1,5 @@
 import { createTRPCRouter } from "../init";
-import { projectsRouter } from "@/modules/projects/server/procedures";
+import { projectsRouter } from "@/features/projects/trpc/procedures";
 
 import { messagesRouter } from "@/features/messages/trpc/procedures";
 import { usageRouter } from "@/features/usage/trpc/procedures";

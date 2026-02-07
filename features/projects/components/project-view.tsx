@@ -22,11 +22,11 @@ import {
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
-import type { Fragment } from "./components/Fragment-web";
-import { FragmentWeb } from "./components/Fragment-web";
-import { GitHubPublishModal } from "./components/github-publish-modal";
-import { MessagesContainer } from "./components/messages-container";
-import { ProjectHeader } from "./components/project-header";
+import type { Fragment } from "./Fragment-web";
+import { FragmentWeb } from "./Fragment-web";
+import { GitHubPublishModal } from "./github-publish-modal";
+import { MessagesContainer } from "./messages-container";
+import { ProjectHeader } from "./project-header";
 
 interface Props {
   projectId: string;
