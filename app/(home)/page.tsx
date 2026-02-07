@@ -1,11 +1,12 @@
 "use client";
+import HeroText from "@/feature/hero/components/hero-text";
+import { sectionVariants } from "@/feature/hero/constants/section-variant";
 import { ProjectForm } from "@/modules/home/ui/Components/project-form";
 import { ProjectList } from "@/modules/home/ui/Components/project-list";
-import { motion } from "framer-motion";
-import HeroText from "@/feature/hero/components/hero-text";
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
-import { sectionVariants } from "@/feature/hero/constants/section-variant";
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 const HomePage = () => {
   const trpc = useTRPC();
@@ -54,26 +55,32 @@ const HomePage = () => {
         }}
         style={{ top: "50%", left: "50%" }}
       />
-      <div className="flex flex-col max-w-5xl mx-auto w-full">
+      <div className="mx-auto flex w-full max-w-5xl flex-col">
         <motion.section
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={sectionVariants}
-          className="space-y-6 py-[16vh] 2xl:py-48"
+          className="space-y-6 py-[16vh] xl:py-32"
         >
-          {/*<div className="flex flex-col items-center">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={sectionVariants}
+            className="flex flex-col items-center"
+          >
             <Image
-              src="/logo.svg"
+              src="/logo.png"
               alt="Vibe"
-              width={50}
-              height={50}
+              width={100}
+              height={100}
               className="hidden md:block"
             />
-          </div>*/}
+          </motion.div>
 
           <HeroText />
-          <div className="max-w-3xl mx-auto w-full">
+          <div className="mx-auto w-full max-w-3xl">
             <ProjectForm />
           </div>
         </motion.section>

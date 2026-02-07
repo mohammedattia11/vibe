@@ -31,6 +31,35 @@ export function convertFilesToTreeItems(files: {
     const fileName = parts[parts.length - 1];
     current[fileName] = null;
   }
+
+  function sortEntries(
+    entries: [string, TreeNode | null][],
+  ): [string, TreeNode | null][] {
+    return entries.sort((a, b) => {
+      const [keyA, valueA] = a;
+      const [keyB, valueB] = b;
+
+      const isDirA = valueA !== null;
+      const isDirB = valueB !== null;
+      const isHiddenA = keyA.startsWith(".");
+      const isHiddenB = keyB.startsWith(".");
+
+      // Directories come first
+      if (isDirA && !isDirB) return -1;
+      if (!isDirA && isDirB) return 1;
+
+      // Both are directories or both are files
+      // Hidden files come last
+      if (!isDirA && !isDirB) {
+        if (isHiddenA && !isHiddenB) return 1;
+        if (!isHiddenA && isHiddenB) return -1;
+      }
+
+      // Sort alphabetically
+      return keyA.localeCompare(keyB);
+    });
+  }
+
   function convertNode(
     node: TreeNode,
     name?: string,
@@ -40,9 +69,12 @@ export function convertFilesToTreeItems(files: {
     if (entries.length === 0) {
       return name || "";
     }
+
+    // Sort entries: directories first, then files, hidden files last
+    const sortedEntries = sortEntries(entries as [string, TreeNode | null][]);
     const children: TreeItemType[] = [];
 
-    for (const [key, value] of entries) {
+    for (const [key, value] of sortedEntries) {
       if (value === null) {
         // this is a file
         children.push(key);

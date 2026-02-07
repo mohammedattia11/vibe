@@ -1,19 +1,19 @@
 "use client";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { toast } from "sonner";
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import TextareaAutosize from "react-textarea-autosize";
-import { ArrowUpIcon, Loader2Icon } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useTRPC } from "@/trpc/client";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Form, FormField } from "@/components/ui/form";
-import { useRouter } from "next/navigation";
-import { PROJECT_TEMPLATES } from "../../constats";
+import { cn } from "@/lib/utils";
+import { useTRPC } from "@/trpc/client";
 import { useClerk } from "@clerk/nextjs";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowUpIcon, Loader2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import TextareaAutosize from "react-textarea-autosize";
+import { toast } from "sonner";
+import { z } from "zod";
+import { PROJECT_TEMPLATES } from "../../constats";
 
 const formSchema = z.object({
   value: z
@@ -70,12 +70,12 @@ export const ProjectForm = () => {
 
   return (
     <Form {...form}>
-      <div className="w-full flex flex-col gap-4">
+      <div className="flex w-full flex-col gap-4">
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className={cn(
-            "relative rounded-xl border bg-sidebar dark:bg-sidebar p-4 pt-2 transition-all",
-            isFocused && "shadow-sm border-primary/40",
+            "bg-sidebar dark:bg-sidebar relative rounded-xl border p-4 pt-2 transition-all",
+            isFocused && "border-primary/40 shadow-sm",
           )}
         >
           <FormField
@@ -89,7 +89,7 @@ export const ProjectForm = () => {
                 maxRows={8}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
-                className="w-full resize-none bg-transparent pt-4 outline-none text-sm"
+                className="w-full resize-none bg-transparent pt-4 text-sm outline-none"
                 placeholder="What Would You Like To Build?"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -102,8 +102,8 @@ export const ProjectForm = () => {
           />
 
           <div className="flex items-center justify-between pt-3">
-            <div className="text-[10px] text-muted-foreground font-mono">
-              <kbd className="inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-medium">
+            <div className="text-muted-foreground font-mono text-[10px]">
+              <kbd className="bg-muted inline-flex h-5 items-center gap-1 rounded border px-1.5 font-medium">
                 <span>⌘</span>Enter
               </kbd>
               &nbsp;to submit
@@ -126,13 +126,13 @@ export const ProjectForm = () => {
           </div>
         </form>
 
-        <div className="hidden md:flex flex-wrap justify-center gap-2 max-w-3xl">
+        <div className="hidden max-w-3xl flex-wrap justify-center gap-2 md:flex">
           {PROJECT_TEMPLATES.map((template) => (
             <Button
               key={template.title}
               variant="outline"
               size="sm"
-              className="bg-white dark:bg-sidebar"
+              className="dark:bg-sidebar bg-white font-heading text-base tracking-wide"
               onClick={() => OnSelect(template.prompt)}
             >
               {template.emoji} {template.title}

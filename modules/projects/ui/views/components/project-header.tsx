@@ -1,23 +1,23 @@
-import Link from "next/link";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import Image from "next/image";
-import { useTheme } from "next-themes";
-import { ChevronLeftIcon, ChevronDownIcon, SunMoonIcon } from "lucide-react";
-import { useTRPC } from "@/trpc/client";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuPortal,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTRPC } from "@/trpc/client";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { ChevronDownIcon, ChevronLeftIcon, SunMoonIcon } from "lucide-react";
+import { useTheme } from "next-themes";
+import Image from "next/image";
+import Link from "next/link";
 
 interface Props {
   projectId: string;
@@ -25,7 +25,7 @@ interface Props {
 export const ProjectHeader = ({ projectId }: Props) => {
   const trpc = useTRPC();
   const { data: project } = useSuspenseQuery(
-    trpc.projects.getOne.queryOptions({ id: projectId }),
+    trpc.projects.getOne.queryOptions({ id: projectId })
   );
 
   const { theme, setTheme } = useTheme();
@@ -39,7 +39,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
             size="sm"
             className="focus-visible:ring-0 hover:bg-transparent hover:opacity-75 transition-opacity pl-2"
           >
-            <Image src="/logo.svg" alt="Vibe" width={18} height={18} />
+            <Image src="/logo.png" alt="Vibe" width={20} height={20} />
             <span className="text-sm font-medium">{project.name}</span>
             <ChevronDownIcon />
           </Button>
