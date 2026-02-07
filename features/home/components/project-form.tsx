@@ -13,7 +13,7 @@ import { useForm } from "react-hook-form";
 import TextareaAutosize from "react-textarea-autosize";
 import { toast } from "sonner";
 import { z } from "zod";
-import { PROJECT_TEMPLATES } from "../../constats";
+import { PROJECT_TEMPLATES } from "../constants/project-templates";
 
 const formSchema = z.object({
   value: z
