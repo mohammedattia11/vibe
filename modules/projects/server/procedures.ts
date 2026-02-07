@@ -209,6 +209,22 @@ export const projectsRouter = createTRPCRouter({
         const fileEntries = await Promise.all(
           changedFiles.map(([path, content]) =>
             limit(async () => {
+              // OPTIMIZATION: For text files, we can pass content directly to createTree
+              // avoiding a separate createBlob API call (N+1 problem).
+              // We only use createBlob for binary files or large content.
+              const isBinary = /\.(png|jpg|jpeg|gif|ico|webp|pdf)$/i.test(path);
+              const isLarge = content.length > 50000; // ~50KB limit for inline content safety
+
+              if (!isBinary && !isLarge) {
+                return {
+                  path,
+                  mode: "100644" as const,
+                  type: "blob" as const,
+                  content: content, // Pass content directly!
+                };
+              }
+
+              // Fallback for binaries/large files: Create Blob first
               const { data: blobData } = await octokit.rest.git.createBlob({
                 owner,
                 repo: repoName,
