@@ -15,6 +15,7 @@ import {
   getsandbox,
   lastAssistantTextMessageContent,
   parseAgentOutput,
+  readAllSandboxFiles,
 } from "./utils";
 import { prisma } from "@/lib/db";
 
@@ -239,6 +240,16 @@ export const codeAgentFunction = inngest.createFunction(
     });
 
     await step.run("save-result", async () => {
+      // Get all files from sandbox (boilerplate + AI generated)
+      const sandbox = await getsandbox(sandboxId);
+      const allSandboxFiles = await readAllSandboxFiles(sandbox);
+
+      // Merge: AI-generated files take precedence over boilerplate
+      const mergedFiles = {
+        ...allSandboxFiles,
+        ...result.state.data.files, // AI files override boilerplate
+      };
+
       if (isError) {
         return await prisma.message.create({
           data: {
@@ -259,7 +270,7 @@ export const codeAgentFunction = inngest.createFunction(
             create: {
               sandboxUrl: sandboxUrl,
               title: parseAgentOutput(fragmentTitleOutput),
-              files: result.state.data.files,
+              files: mergedFiles, // Use merged files instead of just AI files
             },
           },
         },
