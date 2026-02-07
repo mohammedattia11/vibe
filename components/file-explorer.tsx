@@ -124,17 +124,19 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel defaultSize={30} minSize={30} className="bg-sidebar">
-        <TreeView
-          data={treeData}
-          value={selectedFile}
-          onSelect={handleFileSelect}
-        />
+        <div className="h-full overflow-y-auto">
+          <TreeView
+            data={treeData}
+            value={selectedFile}
+            onSelect={handleFileSelect}
+          />
+        </div>
       </ResizablePanel>
       <ResizableHandle className="hover:bg-primary transition-colors" />
       <ResizablePanel defaultSize={70} minSize={50}>
         {selectedFile && files[selectedFile] ? (
-          <div className="h-full w-full flex flex-col">
-            <div className="border-b bg-sidebar px-4 py-2 flex justify-between items-center gap-x-2">
+          <div className="flex h-full w-full flex-col">
+            <div className="bg-sidebar flex items-center justify-between gap-x-2 border-b px-4 py-2">
               <FileBreadcrumb filePath={selectedFile} />
               <Hint text="Copy to clipboard" side="bottom">
                 <Button
@@ -156,7 +158,7 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
             </div>
           </div>
         ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground">
+          <div className="text-muted-foreground flex h-full items-center justify-center">
             Select a file to view it&apos;s content
           </div>
         )}
