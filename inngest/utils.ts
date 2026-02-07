@@ -61,8 +61,15 @@ export async function readAllSandboxFiles(
       for (const entry of entries) {
         const fullPath = `${currentDir}/${entry.name}`.replace(/\/+/g, "/");
 
-        // Skip excluded directories
-        if (excludeDirs.some((dir) => fullPath.includes(`/${dir}/`))) {
+        // Skip excluded directories (check both path and directory name)
+        if (
+          excludeDirs.some(
+            (dir) =>
+              fullPath.includes(`/${dir}/`) ||
+              entry.name === dir ||
+              fullPath.endsWith(`/${dir}`),
+          )
+        ) {
           continue;
         }
 

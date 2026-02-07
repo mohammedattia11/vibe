@@ -1,6 +1,7 @@
 "use client";
-import { CopyCheckIcon, CopyIcon } from "lucide-react";
+import { CopyCheckIcon, CopyIcon, DownloadIcon, CheckIcon } from "lucide-react";
 import { useState, useMemo, useCallback, Fragment } from "react";
+import JSZip from "jszip";
 
 import { Hint } from "./hint";
 import { Button } from "./ui/button";
@@ -97,6 +98,7 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
     return fileKeys.length > 0 ? fileKeys[0] : null;
   });
   const [copied, setCopied] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
 
   const treeData = useMemo(() => {
     return convertFilesToTreeItems(files);
@@ -121,6 +123,34 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
     }
   }, [selectedFile, files]);
 
+  const handleDownloadProject = useCallback(async () => {
+    const zip = new JSZip();
+
+    // Add all files to the zip
+    Object.entries(files).forEach(([filePath, content]) => {
+      zip.file(filePath, content);
+    });
+
+    // Generate the zip file
+    const content = await zip.generateAsync({ type: "blob" });
+
+    // Create download link
+    const url = URL.createObjectURL(content);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "project.zip";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    // Show success state
+    setDownloaded(true);
+    setTimeout(() => {
+      setDownloaded(false);
+    }, 2000);
+  }, [files]);
+
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel defaultSize={30} minSize={30} className="bg-sidebar">
@@ -138,17 +168,30 @@ export const FileExplorer = ({ files }: FileExplorerProps) => {
           <div className="flex h-full w-full flex-col">
             <div className="bg-sidebar flex items-center justify-between gap-x-2 border-b px-4 py-2">
               <FileBreadcrumb filePath={selectedFile} />
-              <Hint text="Copy to clipboard" side="bottom">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="ml-auto"
-                  onClick={handleCopy}
-                  disabled={copied}
-                >
-                  {copied ? <CopyCheckIcon /> : <CopyIcon />}
-                </Button>
-              </Hint>
+              <div className="flex gap-2">
+                <Hint text="Copy to clipboard" side="bottom">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="ml-auto"
+                    onClick={handleCopy}
+                    disabled={copied}
+                  >
+                    {copied ? <CopyCheckIcon /> : <CopyIcon />}
+                  </Button>
+                </Hint>
+                <Hint text="Download project" side="bottom">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="ml-auto"
+                    onClick={handleDownloadProject}
+                    disabled={downloaded}
+                  >
+                    {downloaded ? <CheckIcon /> : <DownloadIcon />}
+                  </Button>
+                </Hint>
+              </div>
             </div>
             <div className="flex-1 overflow-auto">
               <CodeView
