@@ -48,8 +48,6 @@ export const ProjectView = ({ projectId }: Props) => {
     id: projectId,
   })
 );
-
-  
   // GitHub Modal States
   const [isGitHubModalOpen, setGitHubModalOpen] = useState(false);
 

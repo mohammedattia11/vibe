@@ -48,7 +48,7 @@ export const ProjectHeader = ({ projectId }: Props) => {
           <DropdownMenuItem asChild>
             <Link href="/">
               <ChevronLeftIcon />
-              <span>Go To Dashboard</span>
+              <span className="text-sm">Go To Dashboard</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

@@ -1,11 +1,11 @@
 import { inngest } from "@/inngest/client";
 import { prisma } from "@/lib/db";
-import { protectedProcedure, createTRPCRouter } from "@/trpc/init";
-import z from "zod";
-import { generateSlug } from "random-word-slugs";
-import { TRPCError } from "@trpc/server";
 import { consumeCredits } from "@/lib/usage";
+import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { createClerkClient } from "@clerk/nextjs/server";
+import { TRPCError } from "@trpc/server";
+import { generateSlug } from "random-word-slugs";
+import z from "zod";
 
 export const projectsRouter = createTRPCRouter({
   getOne: protectedProcedure
@@ -42,7 +42,7 @@ export const projectsRouter = createTRPCRouter({
     return projects;
   }),
 
-  // Publish To GitHub 
+  // Publish To GitHub
   publishToGithub: protectedProcedure
     .input(
       z.object({
@@ -50,7 +50,7 @@ export const projectsRouter = createTRPCRouter({
         repoName: z.string(),
         files: z.record(z.string(), z.string()),
         commitMessage: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       // Clerk OAuth Token
@@ -58,12 +58,11 @@ export const projectsRouter = createTRPCRouter({
         secretKey: process.env.CLERK_SECRET_KEY,
       });
 
-      const oauthToken =
-        await clerkClient.users.getUserOauthAccessToken(
-          ctx.auth.userId,
-          "oauth_github"
-        );
-
+      const oauthToken = await clerkClient.users.getUserOauthAccessToken(
+        ctx.auth.userId,
+        "oauth_github",
+      );
+      
       const githubToken = oauthToken.data[0]?.token;
 
       if (!githubToken) {
@@ -76,12 +75,9 @@ export const projectsRouter = createTRPCRouter({
       const octokit = new Octokit({ auth: githubToken });
 
       try {
-        const { data: user } =
-          await octokit.rest.users.getAuthenticated();
-
+        const { data: user } = await octokit.rest.users.getAuthenticated();
         const owner = user.login;
         const repoName = input.repoName;
-
         try {
           await octokit.rest.repos.get({
             owner,
@@ -95,15 +91,13 @@ export const projectsRouter = createTRPCRouter({
         }
         for (const [path, content] of Object.entries(input.files)) {
           let sha: string | undefined;
-
           // Try to get SHA if file exists
           try {
-            const { data: existingFile } =
-              await octokit.rest.repos.getContent({
-                owner,
-                repo: repoName,
-                path,
-              });
+            const { data: existingFile } = await octokit.rest.repos.getContent({
+              owner,
+              repo: repoName,
+              path,
+            });
 
             if (!Array.isArray(existingFile)) {
               sha = existingFile.sha;
@@ -139,22 +133,23 @@ export const projectsRouter = createTRPCRouter({
           url: `https://github.com/${owner}/${repoName}`,
         };
       } catch (error: unknown) {
-  if (error instanceof Error) {
-    console.error("GitHub Error:", error.message);
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: error.message,
-    });
-  } else {
-    console.error("Unknown GitHub error", error);
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: "Failed to sync with GitHub",
-    });
-  }
-}
+        if (error instanceof Error) {
+          console.error("GitHub Error:", error.message);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: error.message,
+          });
+        } else {
+          console.error("Unknown GitHub error", error);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to sync with GitHub",
+          });
+        }
+      }
     }),
-create: protectedProcedure
+
+  create: protectedProcedure
     .input(
       z.object({
         value: z
@@ -203,7 +198,6 @@ create: protectedProcedure
           projectId: createdProject.id,
         },
       });
-
       return createdProject;
     }),
 });
