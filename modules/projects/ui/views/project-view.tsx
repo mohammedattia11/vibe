@@ -42,14 +42,11 @@ export const ProjectView = ({ projectId }: Props) => {
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
   const [tabState, setTabState] = useState<"preview" | "Code">("preview");
 
-  //Load Project Data From DB
-
   const projectQuery = useQuery(
     trpc.projects.getOne.queryOptions({
       id: projectId,
     }),
   );
-  // GitHub Modal States
   const [isGitHubModalOpen, setGitHubModalOpen] = useState(false);
 
   const [repoNameInput, setRepoNameInput] = useState("");
@@ -58,7 +55,6 @@ export const ProjectView = ({ projectId }: Props) => {
 
   const [isExistingRepo, setIsExistingRepo] = useState(false);
 
-  //When Project Loads → Fill repoName
   useEffect(() => {
     if (projectQuery.data?.repoName) {
       setRepoNameInput(projectQuery.data.repoName);
@@ -66,13 +62,10 @@ export const ProjectView = ({ projectId }: Props) => {
     }
   }, [projectQuery.data]);
 
-  // GitHub Linked?
   const isGithubLinked =
     !!clerk.user &&
     clerk.user.externalAccounts.some((acc) => acc.provider === "github");
 
-  // GitHub OAuth Connect
-  // GitHub OAuth Connect - التعديل هنا
   const handleGithubAuth = async () => {
     try {
       const user = clerk.user;
@@ -88,24 +81,24 @@ export const ProjectView = ({ projectId }: Props) => {
 
       if (redirectURL) {
         const urlWithPrompt = new URL(redirectURL.href);
-        urlWithPrompt.searchParams.set("prompt", "select_account"); // هذا يطلب من GitHub إظهار اختيار الحساب
+        urlWithPrompt.searchParams.set("prompt", "select_account");
 
         window.location.href = urlWithPrompt.href;
       }
     } catch (err: any) {
-      // ... Catch error logic
+      toast.error("Failed to initiate GitHub authentication");
+      console.error(err);
     }
   };
 
-  // Publish Mutation
   const publishToGithub = useMutation(
     trpc.projects.publishToGithub.mutationOptions({
       onSuccess: (data) => {
         toast.success("Successfully synced with GitHub!");
         window.open(data.url, "_blank");
 
-        //After publish → mark repo as existing
         setIsExistingRepo(true);
+        setGitHubModalOpen(false); // Close modal on success
       },
 
       onError: (error) => {
@@ -122,7 +115,6 @@ export const ProjectView = ({ projectId }: Props) => {
     }),
   );
 
-  // Open Modal
   const openGitHubModal = () => {
     if (!activeFragment) return;
 
@@ -131,7 +123,6 @@ export const ProjectView = ({ projectId }: Props) => {
       return;
     }
 
-    //If repoName already saved → Update Mode
     if (projectQuery.data?.repoName) {
       setIsExistingRepo(true);
     }
@@ -139,7 +130,6 @@ export const ProjectView = ({ projectId }: Props) => {
     setGitHubModalOpen(true);
   };
 
-  // Publish Button Click
   const onPublishClick = () => {
     if (!activeFragment) return;
 
@@ -149,8 +139,6 @@ export const ProjectView = ({ projectId }: Props) => {
       files: activeFragment.files as Record<string, string>,
       commitMessage: commitMessageInput,
     });
-
-    setGitHubModalOpen(false);
   };
 
   return (
