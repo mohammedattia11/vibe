@@ -17,6 +17,7 @@ datasource db {
 model project {
   id        String   @id @default(uuid())
   githubUrl String?
+  repoName  String?
   name      String
   userId    String
   createdAt DateTime @default(now())

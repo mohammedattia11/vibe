@@ -10,15 +10,21 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserControl } from "@/components/user-control";
 import { useAuth, useClerk } from "@clerk/nextjs";
-import { CodeIcon, CrownIcon, EyeIcon, GithubIcon, Loader2Icon } from "lucide-react";
+import {
+  CodeIcon,
+  CrownIcon,
+  EyeIcon,
+  GithubIcon,
+  Loader2Icon,
+} from "lucide-react";
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import type { Fragment } from "./components/Fragment-web";
 import { FragmentWeb } from "./components/Fragment-web";
 import { MessagesContainer } from "./components/messages-container";
 import { ProjectHeader } from "./components/project-header";
-import { useTRPC } from "@/trpc/client";
-import { useMutation } from "@tanstack/react-query";
+import { useTRPC} from "@/trpc/client";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 interface Props {
@@ -29,74 +35,130 @@ export const ProjectView = ({ projectId }: Props) => {
   const { has } = useAuth();
   const clerk = useClerk();
   const trpc = useTRPC();
+
   const hasProAccess = has?.({ plan: "pro" });
 
   const [activeFragment, setActiveFragment] = useState<Fragment | null>(null);
-  const [tabState, setTabState] = useState<"preview" | "code">("preview");
-   
+  const [tabState, setTabState] = useState<"preview" | "Code">("preview");
 
-  const isGithubLinked =
-  !!clerk.user &&
-  clerk.user.externalAccounts.some( //is there atleast one account for github in user`s externalAccounts in clerk
-    (acc) => acc.provider === "github" 
+  //Load Project Data From DB
+
+  const projectQuery = useQuery(
+  trpc.projects.getOne.queryOptions({
+    id: projectId,
+  })
+);
+
+  
+  // GitHub Modal States
+  const [isGitHubModalOpen, setGitHubModalOpen] = useState(false);
+
+  const [repoNameInput, setRepoNameInput] = useState(
+    `ai-gen-${projectId.slice(0, 8)}`
   );
 
-  // function =responsible for connecting the user's GitHub account via Clerk OAuth
+  const [commitMessageInput, setCommitMessageInput] = useState(
+    "🔄 Update from AI Agent"
+  );
+
+  const [isExistingRepo, setIsExistingRepo] = useState(false);
+
+  
+  //When Project Loads → Fill repoName
+  useEffect(() => {
+    if (projectQuery.data?.repoName) {
+      setRepoNameInput(projectQuery.data.repoName);
+      setIsExistingRepo(true);
+    }
+  }, [projectQuery.data]);
+
+  // GitHub Linked?
+  const isGithubLinked =
+    !!clerk.user &&
+    clerk.user.externalAccounts.some((acc) => acc.provider === "github");
+
+  // GitHub OAuth Connect
   const handleGithubAuth = async () => {
     try {
-      // Get the currently logged in clerk user
       const user = clerk.user;
       if (!user) return;
-      // Clerk returns a redirect URL to GitHub's authorization page
+
       const account = await user.createExternalAccount({
         strategy: "oauth_github",
-        redirectUrl: window.location.href, // Return to the same page after auth
+        redirectUrl: window.location.href,
       });
-      // Redirect the user to GitHub to approve access
-      const redirectURL = account.verification?.externalVerificationRedirectURL;  
-      if (redirectURL) {
-        window.location.href = redirectURL.href;
-      }
+
+      const redirectURL =
+        account.verification?.externalVerificationRedirectURL;
+
+      if (redirectURL) window.location.href = redirectURL.href;
     } catch (err: unknown) {
-      if (err instanceof Error){
+      if (err instanceof Error) {
         if (err.message.includes("verification_required")) {
-        toast.info("Please confirm your identity in the profile settings.");
+          toast.info("Please confirm your identity in the profile settings.");
+        } else {
+          toast.error(err.message);
+        }
       } else {
-        toast.error(err.message);
-      }
-      } else {
-        console.error("Unexpected error:", err);
         toast.error("An unexpected error occurred");
       }
     }
   };
 
+  // Publish Mutation
   const publishToGithub = useMutation(
     trpc.projects.publishToGithub.mutationOptions({
-    onSuccess: (data) => {
-      toast.success("Successfully synced with GitHub!");
-      window.open(data.url, "_blank");
-    },
-    onError: (error) => {
-      if (error.message.includes("not linked") || error.message.includes("UNAUTHORIZED")) {
-        toast.info("Connecting your GitHub account... Please wait.");
-        handleGithubAuth();  
-      } else {
-        toast.error(error.message);
-      }
-    },
-  })
+      onSuccess: (data) => {
+        toast.success("Successfully synced with GitHub!");
+        window.open(data.url, "_blank");
+
+        //After publish → mark repo as existing
+        setIsExistingRepo(true);
+      },
+
+      onError: (error) => {
+        if (
+          error.message.includes("not linked") ||
+          error.message.includes("UNAUTHORIZED")
+        ) {
+          toast.info("Connecting your GitHub account...");
+          handleGithubAuth();
+        } else {
+          toast.error(error.message);
+        }
+      },
+    })
   );
 
-  const onPublishClick = () => {
-    // Make sure there are files to publish
+  // Open Modal
+  const openGitHubModal = () => {
     if (!activeFragment) return;
-    
+
+    if (!isGithubLinked) {
+      handleGithubAuth();
+      return;
+    }
+
+    //If repoName already saved → Update Mode
+    if (projectQuery.data?.repoName) {
+      setIsExistingRepo(true);
+    }
+
+    setGitHubModalOpen(true);
+  };
+
+  // Publish Button Click
+  const onPublishClick = () => {
+    if (!activeFragment) return;
+
     publishToGithub.mutate({
       projectId,
-      repoName: `ai-gen-${projectId.slice(0, 8)}`, 
+      repoName: repoNameInput,
       files: activeFragment.files as Record<string, string>,
+      commitMessage: commitMessageInput,
     });
+
+    setGitHubModalOpen(false);
   };
 
   return (
@@ -135,68 +197,118 @@ export const ProjectView = ({ projectId }: Props) => {
 
         <ResizableHandle className="hover:bg-primary transition-colors" />
 
-        {/* RIGHT PANEL: Preview & Code */}
+        {/* RIGHT PANEL */}
         <ResizablePanel defaultSize={65} minSize={50}>
           <Tabs
             value={tabState}
-            onValueChange={(value) => setTabState(value as "preview" | "code")}
+            defaultValue="preview"
+            onValueChange={(value) => setTabState(value as "preview" | "Code")}
             className="h-full gap-y-0"
           >
             <div className="flex w-full items-center gap-x-2 border-b p-2">
               <TabsList className="h-8 rounded-md border p-0">
                 <TabsTrigger value="preview" className="rounded-md">
-                  <EyeIcon className="size-4 mr-1" /> Demo
+                  <EyeIcon /> <span>Demo</span>
                 </TabsTrigger>
                 <TabsTrigger value="code" className="rounded-md">
-                  <CodeIcon className="size-4 mr-1" /> Code
+                  <CodeIcon /> <span>Code</span>
                 </TabsTrigger>
               </TabsList>
+
               {activeFragment && (
-                <Button 
-                variant="outline" size="sm" className="gap-x-2 h-8"
-                disabled={publishToGithub.isPending}
-                onClick={() => {
-                  if (!isGithubLinked) {
-                    handleGithubAuth(); // not linked =>authorize
-                  } else {
-                    onPublishClick(); // linked => so publish
-                    }
-                  }
-                }
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-x-2 h-8"
+                  disabled={publishToGithub.isPending}
+                  onClick={() => {
+                    if (!isGithubLinked) handleGithubAuth();
+                    else openGitHubModal();
+                  }}
                 >
-                  {publishToGithub.isPending ?
-                   (<Loader2Icon className="size-4 animate-spin" /> ) :
-                    (<GithubIcon className="size-4" />)
-                    }
-                    {!isGithubLinked?
-                     "Connect GitHub":
-                      publishToGithub.isPending? 
-                      "Updating GitHub...":
-                       "Publish to GitHub"}
-                       </Button>
-                      )}
+                  {publishToGithub.isPending
+                    ? <Loader2Icon className="size-4 animate-spin" />
+                    : <GithubIcon className="size-4" />}
+                  {!isGithubLinked
+                    ? "Connect GitHub"
+                    : publishToGithub.isPending
+                    ? "Updating GitHub..."
+                    : "Publish to GitHub"}
+                </Button>
+              )}
+
+
               <div className="ml-auto flex items-center gap-x-2">
                 {!hasProAccess && (
                   <Button asChild size="sm" variant="default">
-                    <Link href="/pricing"><CrownIcon className="size-4 mr-1" /> Upgrade</Link>
+                    <Link href="/pricing">
+                      <CrownIcon /> Upgrade
+                    </Link>
                   </Button>
                 )}
                 <UserControl />
               </div>
             </div>
-            
-            <TabsContent value="preview" className="m-0 h-[calc(100%-49px)]">
+            <TabsContent value="preview">
               {!!activeFragment && <FragmentWeb data={activeFragment} />}
             </TabsContent>
-            
-            <TabsContent value="code" className="m-0 h-[calc(100%-49px)] overflow-hidden">
+            <TabsContent value="code" className="min-h-0">
               {!!activeFragment?.files && (
-                <FileExplorer files={activeFragment.files as { [path: string]: string }} />
+                <FileExplorer
+                  files={activeFragment.files as { [path: string]: string }}
+                />
               )}
             </TabsContent>
           </Tabs>
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      
+      {/*GitHub Modal */}
+      
+      {isGitHubModalOpen && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black/50">
+          <div className="bg-white p-6 rounded w-96 text-black">
+            <h2 className="font-bold mb-4">
+              {isExistingRepo
+                ? "Push Update to GitHub"
+                : "Create GitHub Repository"}
+            </h2>
+
+            {/* Repo Name Only First Time */}
+            {!isExistingRepo && (
+              <>
+                <label>Repository Name</label>
+                <input
+                  className="w-full border mb-4 px-2 py-1"
+                  value={repoNameInput}
+                  onChange={(e) => setRepoNameInput(e.target.value)}
+                />
+              </>
+            )}
+
+            <label>Commit Message</label>
+            <input
+              className="w-full border mb-4 px-2 py-1"
+              value={commitMessageInput}
+              onChange={(e) => setCommitMessageInput(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setGitHubModalOpen(false)}
+              >
+                Cancel
+              </Button>
+
+              <Button onClick={onPublishClick}>
+                {isExistingRepo ? "Update" : "Publish"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
