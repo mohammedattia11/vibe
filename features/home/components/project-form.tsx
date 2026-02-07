@@ -2,18 +2,14 @@
 import { Button } from "@/components/ui/button";
 import { Form, FormField } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
-import { useTRPC } from "@/trpc/client";
-import { useClerk } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowUpIcon, Loader2Icon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import TextareaAutosize from "react-textarea-autosize";
-import { toast } from "sonner";
 import { z } from "zod";
 import { PROJECT_TEMPLATES } from "../constants/project-templates";
+import { useCreateProject } from "../hooks/use-create-porject";
 
 const formSchema = z.object({
   value: z
@@ -23,39 +19,20 @@ const formSchema = z.object({
 });
 
 export const ProjectForm = () => {
-  const router = useRouter();
-  const trpc = useTRPC();
-  const clerk = useClerk();
-  const queryClient = useQueryClient();
+  const { mutateAsync, isPending: isCreatingProject } = useCreateProject();
+  const [isFocused, setIsFocused] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { value: "" },
   });
 
-  const createProject = useMutation(
-    trpc.projects.create.mutationOptions({
-      onSuccess: (data) => {
-        queryClient.invalidateQueries(trpc.projects.getMany.queryOptions());
-        queryClient.invalidateQueries(trpc.usage.status.queryOptions());
-        router.push(`/projects/${data.id}`);
-      },
-      onError: (error) => {
-        toast.error(error.message);
-        if (error.data?.code === "UNAUTHORIZED") {
-          clerk.openSignIn();
-        }
-
-        if (error.data?.code === "TOO_MANY_REQUESTS") {
-          router.push("/pricing");
-        }
-      },
-    }),
-  );
+  const isButtonDisabled = isCreatingProject || !form.formState.isValid;
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    await createProject.mutateAsync({ value: values.value });
+    await mutateAsync({ value: values.value });
   };
+
   const OnSelect = (value: string) => {
     form.setValue("value", value, {
       shouldValidate: true,
@@ -63,10 +40,6 @@ export const ProjectForm = () => {
       shouldTouch: true,
     });
   };
-
-  const [isFocused, setIsFocused] = useState(false);
-  const isPending = createProject.isPending;
-  const isButtonDisabled = isPending || !form.formState.isValid;
 
   return (
     <Form {...form}>
@@ -84,7 +57,7 @@ export const ProjectForm = () => {
             render={({ field }) => (
               <TextareaAutosize
                 {...field}
-                disabled={isPending}
+                disabled={isCreatingProject}
                 minRows={2}
                 maxRows={8}
                 onFocus={() => setIsFocused(true)}
@@ -117,7 +90,7 @@ export const ProjectForm = () => {
                 isButtonDisabled && "bg-muted text-muted-foreground border",
               )}
             >
-              {isPending ? (
+              {isCreatingProject ? (
                 <Loader2Icon className="size-4 animate-spin" />
               ) : (
                 <ArrowUpIcon className="size-4" />
@@ -132,7 +105,7 @@ export const ProjectForm = () => {
               key={template.title}
               variant="outline"
               size="sm"
-              className="dark:bg-sidebar bg-white font-heading text-base tracking-wide"
+              className="dark:bg-sidebar font-heading bg-white text-base tracking-wide"
               onClick={() => OnSelect(template.prompt)}
             >
               {template.emoji} {template.title}

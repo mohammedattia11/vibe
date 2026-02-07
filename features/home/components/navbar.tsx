@@ -3,7 +3,7 @@
 import { ToggleThemeButton } from "@/components/toggle-theme-button";
 import { Button } from "@/components/ui/button";
 import { UserControl } from "@/components/user-control";
-import { useScroll } from "@/hooks/use-scroll";
+import { useScroll } from "../hooks/use-scroll";
 import { cn } from "@/lib/utils";
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/nextjs";
 import Image from "next/image";

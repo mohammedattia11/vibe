@@ -13,7 +13,7 @@ export default function HeroText() {
   return (
     <div className="space-y-4">
       <motion.h1
-        className="text-center text-2xl font-bold sm:text-4xl md:text-5xl text-zinc-300"
+        className="text-center text-2xl font-bold text-zinc-300 sm:text-4xl md:text-5xl"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -22,7 +22,7 @@ export default function HeroText() {
           <motion.span
             key={index}
             variants={wordVariants}
-            className="mr-1 md:mr-2 inline-block"
+            className="mr-1 inline-block md:mr-2"
           >
             {word}
           </motion.span>

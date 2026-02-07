@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ProjectTypes } from "@/types";
+import { ProjectTypes } from "../types/project-types";
 import { useUser } from "@clerk/nextjs";
 import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
@@ -16,7 +16,9 @@ export const ProjectList = ({ projects }: ProjectListProps) => {
   if (!user) return null;
   return (
     <div className="dark:bg-sidebar flex w-full flex-col gap-y-6 rounded-xl border bg-white p-8 sm:gap-y-8">
-      <h2 className="text-2xl font-semibold tracking-wide">{user?.firstName}&apos;s Vibes</h2>
+      <h2 className="text-2xl font-semibold tracking-wide">
+        {user?.firstName}&apos;s Vibes
+      </h2>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
         {projects?.length === 0 && (
           <div className="cols-span-4 text-center">
