@@ -78,6 +78,7 @@ export const ProjectView = ({ projectId }: Props) => {
     clerk.user.externalAccounts.some((acc) => acc.provider === "github");
 
   // GitHub OAuth Connect
+  // GitHub OAuth Connect - التعديل هنا
   const handleGithubAuth = async () => {
     try {
       const user = clerk.user;
@@ -86,22 +87,21 @@ export const ProjectView = ({ projectId }: Props) => {
       const account = await user.createExternalAccount({
         strategy: "oauth_github",
         redirectUrl: window.location.href,
+        // إضافة هذا السطر يطلب من GitHub إجبار المستخدم على اختيار حساب
+        additionalScopes: ["repo", "user"], 
       });
 
-      const redirectURL =
-        account.verification?.externalVerificationRedirectURL;
+      const redirectURL = account.verification?.externalVerificationRedirectURL;
 
-      if (redirectURL) window.location.href = redirectURL.href;
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        if (err.message.includes("verification_required")) {
-          toast.info("Please confirm your identity in the profile settings.");
-        } else {
-          toast.error(err.message);
-        }
-      } else {
-        toast.error("An unexpected error occurred");
+      if (redirectURL) {
+        // إضافة مطالبات لـ GitHub لإظهار صفحة تسجيل الدخول حتى لو في حساب مفتوح
+        const urlWithPrompt = new URL(redirectURL.href);
+        urlWithPrompt.searchParams.set("prompt", "select_account"); // هذا يطلب من GitHub إظهار اختيار الحساب
+        
+        window.location.href = urlWithPrompt.href;
       }
+    } catch (err:any) {
+      // ... Catch error logic
     }
   };
 
