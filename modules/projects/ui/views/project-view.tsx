@@ -9,7 +9,9 @@ import {
 } from "@/components/ui/resizable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserControl } from "@/components/user-control";
+import { useTRPC } from "@/trpc/client";
 import { useAuth, useClerk } from "@clerk/nextjs";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   CodeIcon,
   CrownIcon,
@@ -19,13 +21,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
+import { toast } from "sonner";
 import type { Fragment } from "./components/Fragment-web";
 import { FragmentWeb } from "./components/Fragment-web";
 import { MessagesContainer } from "./components/messages-container";
 import { ProjectHeader } from "./components/project-header";
-import { useTRPC} from "@/trpc/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 interface Props {
   projectId: string;
@@ -44,24 +44,23 @@ export const ProjectView = ({ projectId }: Props) => {
   //Load Project Data From DB
 
   const projectQuery = useQuery(
-  trpc.projects.getOne.queryOptions({
-    id: projectId,
-  })
-);
+    trpc.projects.getOne.queryOptions({
+      id: projectId,
+    }),
+  );
   // GitHub Modal States
   const [isGitHubModalOpen, setGitHubModalOpen] = useState(false);
 
   const [repoNameInput, setRepoNameInput] = useState(
-    `ai-gen-${projectId.slice(0, 8)}`
+    `ai-gen-${projectId.slice(0, 8)}`,
   );
 
   const [commitMessageInput, setCommitMessageInput] = useState(
-    "🔄 Update from AI Agent"
+    "🔄 Update from AI Agent",
   );
 
   const [isExistingRepo, setIsExistingRepo] = useState(false);
 
-  
   //When Project Loads → Fill repoName
   useEffect(() => {
     if (projectQuery.data?.repoName) {
@@ -86,7 +85,7 @@ export const ProjectView = ({ projectId }: Props) => {
         strategy: "oauth_github",
         redirectUrl: window.location.href,
         // إضافة هذا السطر يطلب من GitHub إجبار المستخدم على اختيار حساب
-        additionalScopes: ["repo", "user"], 
+        additionalScopes: ["repo", "user"],
       });
 
       const redirectURL = account.verification?.externalVerificationRedirectURL;
@@ -95,10 +94,10 @@ export const ProjectView = ({ projectId }: Props) => {
         // إضافة مطالبات لـ GitHub لإظهار صفحة تسجيل الدخول حتى لو في حساب مفتوح
         const urlWithPrompt = new URL(redirectURL.href);
         urlWithPrompt.searchParams.set("prompt", "select_account"); // هذا يطلب من GitHub إظهار اختيار الحساب
-        
+
         window.location.href = urlWithPrompt.href;
       }
-    } catch (err:any) {
+    } catch (err: any) {
       // ... Catch error logic
     }
   };
@@ -125,7 +124,7 @@ export const ProjectView = ({ projectId }: Props) => {
           toast.error(error.message);
         }
       },
-    })
+    }),
   );
 
   // Open Modal
@@ -217,24 +216,25 @@ export const ProjectView = ({ projectId }: Props) => {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="gap-x-2 h-8"
+                  className="h-8 gap-x-2"
                   disabled={publishToGithub.isPending}
                   onClick={() => {
                     if (!isGithubLinked) handleGithubAuth();
                     else openGitHubModal();
                   }}
                 >
-                  {publishToGithub.isPending
-                    ? <Loader2Icon className="size-4 animate-spin" />
-                    : <GithubIcon className="size-4" />}
+                  {publishToGithub.isPending ? (
+                    <Loader2Icon className="size-4 animate-spin" />
+                  ) : (
+                    <GithubIcon className="size-4" />
+                  )}
                   {!isGithubLinked
                     ? "Connect GitHub"
                     : publishToGithub.isPending
-                    ? "Updating GitHub..."
-                    : "Publish to GitHub"}
+                      ? "Updating GitHub..."
+                      : "Publish to GitHub"}
                 </Button>
               )}
-
 
               <div className="ml-auto flex items-center gap-x-2">
                 {!hasProAccess && (
@@ -261,13 +261,12 @@ export const ProjectView = ({ projectId }: Props) => {
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      
       {/*GitHub Modal */}
-      
+
       {isGitHubModalOpen && (
-        <div className="fixed inset-0 flex justify-center items-center bg-black/50">
-          <div className="bg-white p-6 rounded w-96 text-black">
-            <h2 className="font-bold mb-4">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50">
+          <div className="w-96 rounded bg-white p-6 text-black">
+            <h2 className="mb-4 font-bold">
               {isExistingRepo
                 ? "Push Update to GitHub"
                 : "Create GitHub Repository"}
@@ -278,7 +277,7 @@ export const ProjectView = ({ projectId }: Props) => {
               <>
                 <label>Repository Name</label>
                 <input
-                  className="w-full border mb-4 px-2 py-1"
+                  className="mb-4 w-full border px-2 py-1"
                   value={repoNameInput}
                   onChange={(e) => setRepoNameInput(e.target.value)}
                 />
@@ -287,7 +286,7 @@ export const ProjectView = ({ projectId }: Props) => {
 
             <label>Commit Message</label>
             <input
-              className="w-full border mb-4 px-2 py-1"
+              className="mb-4 w-full border px-2 py-1"
               value={commitMessageInput}
               onChange={(e) => setCommitMessageInput(e.target.value)}
             />
