@@ -5,7 +5,62 @@ import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { createClerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { generateSlug } from "random-word-slugs";
+import pLimit from "p-limit";
 import z from "zod";
+import { createHash } from "crypto";
+
+/**
+ * Calculate Git SHA-1 hash for a file (matching GitHub's blob format)
+ * Git blob format: "blob <size>\0<content>"
+ */
+function calculateGitSHA(content: string): string {
+  const buffer = Buffer.from(content);
+  const header = `blob ${buffer.length}\0`;
+  const sha = createHash("sha1");
+  sha.update(header);
+  sha.update(buffer);
+  return sha.digest("hex");
+}
+
+/**
+ * Fetch all files from GitHub repository recursively
+ * Returns a map of filepath -> SHA for comparison
+ */
+async function fetchRemoteFileSHAs(
+  octokit: any,
+  owner: string,
+  repo: string,
+  treeSha: string,
+): Promise<Map<string, string>> {
+  const remoteFiles = new Map<string, string>();
+
+  try {
+    // Fetch the full recursive tree (recursive: true gets all nested files)
+    const { data: treeData } = await octokit.rest.git.getTree({
+      owner,
+      repo,
+      tree_sha: treeSha,
+      recursive: "true",
+    });
+
+    // Map each file to its SHA
+    treeData.tree.forEach(
+      (item: { path: string; sha: string; type: string }) => {
+        if (item.type === "blob") {
+          remoteFiles.set(item.path, item.sha);
+        }
+      },
+    );
+  } catch (error) {
+    // If fetch fails, return empty map to force re-upload all files
+    console.warn(
+      "Failed to fetch remote tree, will re-upload all files:",
+      error,
+    );
+  }
+
+  return remoteFiles;
+}
 
 export const projectsRouter = createTRPCRouter({
   getOne: protectedProcedure
@@ -42,7 +97,7 @@ export const projectsRouter = createTRPCRouter({
     return projects;
   }),
 
-  // Publish To GitHub
+  // Publish To GitHub with Smart Sync (Differential Updates)
   publishToGithub: protectedProcedure
     .input(
       z.object({
@@ -62,7 +117,7 @@ export const projectsRouter = createTRPCRouter({
         ctx.auth.userId,
         "oauth_github",
       );
-      
+
       const githubToken = oauthToken.data[0]?.token;
 
       if (!githubToken) {
@@ -89,35 +144,114 @@ export const projectsRouter = createTRPCRouter({
             auto_init: true,
           });
         }
+        // Get the default branch
+        const { data: repoData } = await octokit.rest.repos.get({
+          owner,
+          repo: repoName,
+        });
+        const defaultBranch = repoData.default_branch;
+
+        // Get the current commit SHA for the default branch
+        const { data: refData } = await octokit.rest.git.getRef({
+          owner,
+          repo: repoName,
+          ref: `heads/${defaultBranch}`,
+        });
+        const currentCommitSha = refData.object.sha;
+
+        // Get the base tree
+        const { data: commitData } = await octokit.rest.git.getCommit({
+          owner,
+          repo: repoName,
+          commit_sha: currentCommitSha,
+        });
+        const baseTreeSha = commitData.tree.sha;
+
+        // SMART SYNC: Fetch remote file hashes to compare
+        const remoteFileSHAs = await fetchRemoteFileSHAs(
+          octokit,
+          owner,
+          repoName,
+          baseTreeSha,
+        );
+
+        // Calculate local file hashes and identify changed files
+        const changedFiles: Array<[string, string]> = [];
         for (const [path, content] of Object.entries(input.files)) {
-          let sha: string | undefined;
-          // Try to get SHA if file exists
-          try {
-            const { data: existingFile } = await octokit.rest.repos.getContent({
-              owner,
-              repo: repoName,
-              path,
-            });
+          const localSHA = calculateGitSHA(content);
+          const remoteSHA = remoteFileSHAs.get(path);
 
-            if (!Array.isArray(existingFile)) {
-              sha = existingFile.sha;
-            }
-          } catch {
-            sha = undefined;
+          // Only include files that are new or have changed
+          if (localSHA !== remoteSHA) {
+            changedFiles.push([path, content]);
           }
-
-          // Create or Update file
-          await octokit.rest.repos.createOrUpdateFileContents({
-            owner,
-            repo: repoName,
-            path,
-            message:
-              input.commitMessage ??
-              `🔄 Sync Update - ${new Date().toLocaleString()}`,
-            content: Buffer.from(content).toString("base64"),
-            sha,
-          });
         }
+
+        // If no files changed, skip the commit
+        if (changedFiles.length === 0) {
+          await prisma.project.update({
+            where: {
+              id: input.projectId,
+            },
+            data: {
+              repoName: repoName,
+              githubUrl: `https://github.com/${owner}/${repoName}`,
+            },
+          });
+
+          return {
+            url: `https://github.com/${owner}/${repoName}`,
+          };
+        }
+
+        // Create blobs ONLY for changed files with concurrency limit
+        const limit = pLimit(5);
+        const fileEntries = await Promise.all(
+          changedFiles.map(([path, content]) =>
+            limit(async () => {
+              const { data: blobData } = await octokit.rest.git.createBlob({
+                owner,
+                repo: repoName,
+                content: Buffer.from(content).toString("base64"),
+                encoding: "base64",
+              });
+              return {
+                path,
+                mode: "100644" as const,
+                type: "blob" as const,
+                sha: blobData.sha,
+              };
+            }),
+          ),
+        );
+
+        // Create a new tree with changed files
+        const { data: newTree } = await octokit.rest.git.createTree({
+          owner,
+          repo: repoName,
+          base_tree: baseTreeSha,
+          tree: fileEntries,
+        });
+
+        // Create a single commit with all changes
+        const { data: newCommit } = await octokit.rest.git.createCommit({
+          owner,
+          repo: repoName,
+          message:
+            input.commitMessage ??
+            `🔄 Sync Update - ${new Date().toLocaleString()}`,
+          tree: newTree.sha,
+          parents: [currentCommitSha],
+        });
+
+        // Update the branch reference to point to the new commit
+        await octokit.rest.git.updateRef({
+          owner,
+          repo: repoName,
+          ref: `heads/${defaultBranch}`,
+          sha: newCommit.sha,
+          force: false,
+        });
 
         await prisma.project.update({
           where: {
