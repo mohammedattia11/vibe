@@ -24,6 +24,7 @@ import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { Fragment } from "./components/Fragment-web";
 import { FragmentWeb } from "./components/Fragment-web";
+import { GitHubPublishModal } from "./components/github-publish-modal";
 import { MessagesContainer } from "./components/messages-container";
 import { ProjectHeader } from "./components/project-header";
 
@@ -51,13 +52,9 @@ export const ProjectView = ({ projectId }: Props) => {
   // GitHub Modal States
   const [isGitHubModalOpen, setGitHubModalOpen] = useState(false);
 
-  const [repoNameInput, setRepoNameInput] = useState(
-    `ai-gen-${projectId.slice(0, 8)}`,
-  );
+  const [repoNameInput, setRepoNameInput] = useState("");
 
-  const [commitMessageInput, setCommitMessageInput] = useState(
-    "🔄 Update from AI Agent",
-  );
+  const [commitMessageInput, setCommitMessageInput] = useState("");
 
   const [isExistingRepo, setIsExistingRepo] = useState(false);
 
@@ -84,14 +81,12 @@ export const ProjectView = ({ projectId }: Props) => {
       const account = await user.createExternalAccount({
         strategy: "oauth_github",
         redirectUrl: window.location.href,
-        // إضافة هذا السطر يطلب من GitHub إجبار المستخدم على اختيار حساب
         additionalScopes: ["repo", "user"],
       });
 
       const redirectURL = account.verification?.externalVerificationRedirectURL;
 
       if (redirectURL) {
-        // إضافة مطالبات لـ GitHub لإظهار صفحة تسجيل الدخول حتى لو في حساب مفتوح
         const urlWithPrompt = new URL(redirectURL.href);
         urlWithPrompt.searchParams.set("prompt", "select_account"); // هذا يطلب من GitHub إظهار اختيار الحساب
 
@@ -262,50 +257,17 @@ export const ProjectView = ({ projectId }: Props) => {
       </ResizablePanelGroup>
 
       {/*GitHub Modal */}
-
-      {isGitHubModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50">
-          <div className="w-96 rounded bg-white p-6 text-black">
-            <h2 className="mb-4 font-bold">
-              {isExistingRepo
-                ? "Push Update to GitHub"
-                : "Create GitHub Repository"}
-            </h2>
-
-            {/* Repo Name Only First Time */}
-            {!isExistingRepo && (
-              <>
-                <label>Repository Name</label>
-                <input
-                  className="mb-4 w-full border px-2 py-1"
-                  value={repoNameInput}
-                  onChange={(e) => setRepoNameInput(e.target.value)}
-                />
-              </>
-            )}
-
-            <label>Commit Message</label>
-            <input
-              className="mb-4 w-full border px-2 py-1"
-              value={commitMessageInput}
-              onChange={(e) => setCommitMessageInput(e.target.value)}
-            />
-
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setGitHubModalOpen(false)}
-              >
-                Cancel
-              </Button>
-
-              <Button onClick={onPublishClick}>
-                {isExistingRepo ? "Update" : "Publish"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <GitHubPublishModal
+        open={isGitHubModalOpen}
+        onOpenChange={setGitHubModalOpen}
+        repoName={repoNameInput}
+        onRepoNameChange={setRepoNameInput}
+        commitMessage={commitMessageInput}
+        onCommitMessageChange={setCommitMessageInput}
+        isExistingRepo={isExistingRepo}
+        isPublishing={publishToGithub.isPending}
+        onPublish={onPublishClick}
+      />
     </div>
   );
 };
