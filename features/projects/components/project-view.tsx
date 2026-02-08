@@ -82,7 +82,7 @@ export const ProjectView = ({ projectId }: Props) => {
 
     publishProject({
       projectId,
-      repoName: repoNameInput,
+      repoName: repoNameInput.replaceAll(" ","-"),
       files: activeFragment.files as Record<string, string>,
       commitMessage: commitMessageInput,
     });
