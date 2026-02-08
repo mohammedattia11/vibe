@@ -1,8 +1,8 @@
 "use client";
-import HeroText from "@/feature/hero/components/hero-text";
-import { sectionVariants } from "@/feature/hero/constants/section-variant";
-import { ProjectForm } from "@/modules/home/ui/Components/project-form";
-import { ProjectList } from "@/modules/home/ui/Components/project-list";
+import HeroText from "@/features/home/components/hero-text";
+import { sectionVariants } from "@/features/home/constants/section-variant";
+import { ProjectForm } from "@/features/home/components/project-form";
+import { ProjectList } from "@/features/home/components/project-list";
 import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
