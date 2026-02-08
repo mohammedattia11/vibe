@@ -7,60 +7,8 @@ import { TRPCError } from "@trpc/server";
 import { generateSlug } from "random-word-slugs";
 import pLimit from "p-limit";
 import z from "zod";
-import { createHash } from "crypto";
-
-/**
- * Calculate Git SHA-1 hash for a file (matching GitHub's blob format)
- * Git blob format: "blob <size>\0<content>"
- */
-function calculateGitSHA(content: string): string {
-  const buffer = Buffer.from(content);
-  const header = `blob ${buffer.length}\0`;
-  const sha = createHash("sha1");
-  sha.update(header);
-  sha.update(buffer);
-  return sha.digest("hex");
-}
-
-/**
- * Fetch all files from GitHub repository recursively
- * Returns a map of filepath -> SHA for comparison
- */
-async function fetchRemoteFileSHAs(
-  octokit: any,
-  owner: string,
-  repo: string,
-  treeSha: string,
-): Promise<Map<string, string>> {
-  const remoteFiles = new Map<string, string>();
-
-  try {
-    // Fetch the full recursive tree (recursive: true gets all nested files)
-    const { data: treeData } = await octokit.rest.git.getTree({
-      owner,
-      repo,
-      tree_sha: treeSha,
-      recursive: "true",
-    });
-
-    // Map each file to its SHA
-    treeData.tree.forEach(
-      (item: { path: string; sha: string; type: string }) => {
-        if (item.type === "blob") {
-          remoteFiles.set(item.path, item.sha);
-        }
-      },
-    );
-  } catch (error) {
-    // If fetch fails, return empty map to force re-upload all files
-    console.warn(
-      "Failed to fetch remote tree, will re-upload all files:",
-      error,
-    );
-  }
-
-  return remoteFiles;
-}
+import { fetchRemoteFileSHAs } from "../features/github-sync/utils/fetch-remote-SHA";
+import { calculateGitSHA } from "../features/github-sync/utils/calculateGitSHA";
 
 export const projectsRouter = createTRPCRouter({
   getOne: protectedProcedure

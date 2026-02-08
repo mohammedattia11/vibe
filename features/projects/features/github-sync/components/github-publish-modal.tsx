@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AnimatePresence, motion } from "framer-motion";
 import { GithubIcon, Loader2Icon } from "lucide-react";
-import { useEffect, useState } from "react";
 
 interface GitHubPublishModalProps {
   open: boolean;
