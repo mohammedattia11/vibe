@@ -3,8 +3,8 @@ import { CopyCheckIcon, CopyIcon, DownloadIcon, CheckIcon } from "lucide-react";
 import { useState, useMemo, useCallback, Fragment } from "react";
 import JSZip from "jszip";
 
-import { Hint } from "./hint";
-import { Button } from "./ui/button";
+import { Hint } from "@/components/hint";
+import { Button } from "@/components/ui/button";
 import { CodeView } from "./code-view";
 import { TreeView } from "./tree-view";
 

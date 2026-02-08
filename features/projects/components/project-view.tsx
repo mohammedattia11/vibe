@@ -1,6 +1,6 @@
 "use client";
 
-import { FileExplorer } from "@/components/file-explorer";
+import { FileExplorer } from "./file-explorer";
 import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
