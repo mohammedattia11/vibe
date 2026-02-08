@@ -1,8 +1,8 @@
+import { useTRPC } from "@/trpc/client";
+import type { UserResource } from "@clerk/types";
+
 export type TreeItemType = string | [string, ...TreeItemType[]];
 
-export type ProjectTypes = {
-  id: string,
-  name: string,
-  userId: string,
-  updatedAt: Date
-}
+export type TrpcUtils = ReturnType<typeof useTRPC>
+
+export type ClerkUserType = UserResource | null | undefined;

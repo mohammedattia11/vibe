@@ -1,8 +1,8 @@
 import { createTRPCRouter } from "../init";
-import { projectsRouter } from "@/modules/projects/server/procedures";
+import { projectsRouter } from "@/features/projects/trpc/procedures";
 
-import { messagesRouter } from "@/modules/messages/server/procedures";
-import { usageRouter } from "@/modules/usage/server/procedures";
+import { messagesRouter } from "@/features/messages/trpc/procedures";
+import { usageRouter } from "@/features/usage/trpc/procedures";
 
 export const appRouter = createTRPCRouter({
   messages: messagesRouter,
