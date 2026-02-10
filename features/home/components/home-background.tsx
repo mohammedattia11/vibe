@@ -12,7 +12,7 @@ export const HomeBackground = ({ children }: HomeBackgroundProps) => {
         className="absolute inset-0 -z-10"
         style={{
           background:
-            "radial-gradient(80% 100% at 0% 100%, #f97316 50%, #3b82f6 100%)",
+            "radial-gradient(80% 100% at 0% 100%, #0c4a6e 50%, #0c4a6e  100%)",
           WebkitMaskImage: "linear-gradient(to top, black 0%, transparent 60%)",
           maskImage: "linear-gradient(to top, black 0%, transparent 60%)",
           WebkitMaskRepeat: "no-repeat",
