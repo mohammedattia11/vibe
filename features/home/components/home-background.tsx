@@ -1,10 +1,6 @@
 import React from "react";
 
-interface HomeBackgroundProps {
-  children: React.ReactNode;
-}
-
-export const HomeBackground = ({ children }: HomeBackgroundProps) => {
+export const MainBackground = ({ children }: React.PropsWithChildren) => {
   return (
     <div className="relative min-h-screen overflow-hidden px-2">
       {children}

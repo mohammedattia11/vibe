@@ -7,13 +7,11 @@ import { useTRPC } from "@/trpc/client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import { HomeBackground } from "@/features/home/components/home-background";
 
 const HomePage = () => {
   const trpc = useTRPC();
   const { data: projects } = useQuery(trpc.projects.getMany.queryOptions());
   return (
-    <HomeBackground>
       <div className="mx-auto flex w-full max-w-5xl flex-col">
         <motion.section
           initial="hidden"
@@ -54,7 +52,6 @@ const HomePage = () => {
           </motion.div>
         )}
       </div>
-    </HomeBackground>
   );
 };
 export default HomePage;
