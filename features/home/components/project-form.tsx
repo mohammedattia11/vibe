@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import TextareaAutosize from "react-textarea-autosize";
 import { z } from "zod";
-import { PROJECT_TEMPLATES } from "../constants/project-templates";
+// import { PROJECT_TEMPLATES } from "../constants/project-templates";
 import { useCreateProject } from "../hooks/use-create-porject";
 
 const formSchema = z.object({
@@ -98,7 +98,7 @@ export const ProjectForm = () => {
             </Button>
           </div>
         </form>
-
+{/*
         <div className="hidden max-w-3xl flex-wrap justify-center gap-2 md:flex">
           {PROJECT_TEMPLATES.map((template) => (
             <Button
@@ -111,7 +111,7 @@ export const ProjectForm = () => {
               {template.emoji} {template.title}
             </Button>
           ))}
-        </div>
+        </div>*/}
       </div>
     </Form>
   );
