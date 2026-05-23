@@ -1,4 +1,4 @@
-import { MainBackground } from "@/features/home/components/home-background";
+import { MainBackground } from "@/features/home/components/main-background";
 import { Navbar } from "@/features/home/components/navbar";
 
 interface Props {
