@@ -1,15 +1,17 @@
-import { z } from "zod";
+import { prisma } from "@/lib/db";
+import { sanitizeText } from "@/lib/sanitize-text";
+import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "@/prompt";
 import { Sandbox } from "@e2b/code-interpreter";
 import {
   createAgent,
   createNetwork,
+  createState,
   createTool,
   openai,
-  type Tool,
   type Message,
-  createState,
+  type Tool,
 } from "@inngest/agent-kit";
-import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "@/prompt";
+import { z } from "zod";
 import { inngest } from "./client";
 import {
   getsandbox,
@@ -17,7 +19,6 @@ import {
   parseAgentOutput,
   readAllSandboxFiles,
 } from "./utils";
-import { prisma } from "@/lib/db";
 
 interface AgentState {
   summary: string;
@@ -260,13 +261,13 @@ export const codeAgentFunction = inngest.createFunction(
       return await prisma.message.create({
         data: {
           projectId: event.data.projectId,
-          content: parseAgentOutput(responseOutput),
+          content: sanitizeText(parseAgentOutput(responseOutput)),
           role: "ASSISTANT",
           type: "RESULT",
           fragment: {
             create: {
               sandboxUrl: sandboxUrl,
-              title: parseAgentOutput(fragmentTitleOutput),
+              title: sanitizeText(parseAgentOutput(fragmentTitleOutput)),
               files: mergedFiles, // Use merged files instead of just AI files
             },
           },
