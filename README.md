@@ -20,7 +20,6 @@
 Whether you're prototyping an idea or building a full dashboard, Vibe handles the heavy lifting of coding, styling (with Tailwind CSS), and component assembly.
 
 ![Demo Screenshot](./public/demo.png)
-_(Note: Add a `demo.png` to your `public` folder to show a screenshot of the app interface)_
 
 ## Features
 
