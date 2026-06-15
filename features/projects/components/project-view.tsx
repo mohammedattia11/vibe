@@ -1,6 +1,6 @@
 "use client";
 
-import { FileExplorer } from "./file-explorer";
+import { AuroraLoading } from "@/components/aurora-loading";
 import { Button } from "@/components/ui/button";
 import {
   ResizableHandle,
@@ -21,13 +21,17 @@ import {
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { GitHubPublishModal } from "../features/github-sync/components/github-publish-modal";
+import {
+  useGetProject,
+  usePublishProject,
+} from "../features/github-sync/hooks/use-github-sync";
+import { handleGithubAuth } from "../features/github-sync/utils/handle-github-auth";
+import { FileExplorer } from "./file-explorer";
 import type { Fragment } from "./Fragment-web";
 import { FragmentWeb } from "./Fragment-web";
-import { GitHubPublishModal } from "../features/github-sync/components/github-publish-modal";
 import { MessagesContainer } from "./messages-container";
 import { ProjectHeader } from "./project-header";
-import { useGetProject, usePublishProject } from "../features/github-sync/hooks/use-github-sync";
-import { handleGithubAuth } from "../features/github-sync/utils/handle-github-auth";
 
 interface Props {
   projectId: string;
@@ -35,7 +39,7 @@ interface Props {
 
 export const ProjectView = ({ projectId }: Props) => {
   const { has } = useAuth();
-  const { user:clerkUser} = useClerk();
+  const { user: clerkUser } = useClerk();
   const trpc = useTRPC();
   const hasProAccess = has?.({ plan: "pro" });
 
@@ -47,20 +51,24 @@ export const ProjectView = ({ projectId }: Props) => {
   const [isExistingRepo, setIsExistingRepo] = useState(false);
 
   const githubProject = useGetProject(trpc, projectId);
-  
+
   const isGithubLinked =
     !!clerkUser &&
     clerkUser.externalAccounts.some((acc) => acc.provider === "github");
 
-  const handleSucess = (data:any) => {
+  const handleSucess = (data: any) => {
     toast.success("Successfully synced with GitHub!");
     window.open(data.url, "_blank");
 
     setIsExistingRepo(true);
     setGitHubModalOpen(false); // Close modal on success
-  }
-  
-  const { mutate:publishProject, isPending:isPublishing} = usePublishProject(trpc, handleSucess, clerkUser);
+  };
+
+  const { mutate: publishProject, isPending: isPublishing } = usePublishProject(
+    trpc,
+    handleSucess,
+    clerkUser,
+  );
 
   const openGitHubModal = () => {
     if (!activeFragment) return;
@@ -82,7 +90,7 @@ export const ProjectView = ({ projectId }: Props) => {
 
     publishProject({
       projectId,
-      repoName: repoNameInput.replaceAll(" ","-"),
+      repoName: repoNameInput.replaceAll(" ", "-"),
       files: activeFragment.files as Record<string, string>,
       commitMessage: commitMessageInput,
     });
@@ -141,10 +149,10 @@ export const ProjectView = ({ projectId }: Props) => {
           >
             <div className="flex w-full items-center gap-x-2 border-b p-2">
               <TabsList className="h-8 rounded-md border p-0">
-                <TabsTrigger value="preview" className="rounded-md">
+                <TabsTrigger value="preview" className="rounded-md" disabled={!activeFragment}>
                   <EyeIcon /> <span>Demo</span>
                 </TabsTrigger>
-                <TabsTrigger value="code" className="rounded-md">
+                <TabsTrigger value="code" className="rounded-md" disabled={!activeFragment}>
                   <CodeIcon /> <span>Code</span>
                 </TabsTrigger>
               </TabsList>
@@ -167,7 +175,7 @@ export const ProjectView = ({ projectId }: Props) => {
                   )}
                   {!isGithubLinked
                     ? "Connect GitHub"
-                    :isPublishing 
+                    : isPublishing
                       ? "Updating GitHub..."
                       : "Publish to GitHub"}
                 </Button>
@@ -185,7 +193,11 @@ export const ProjectView = ({ projectId }: Props) => {
               </div>
             </div>
             <TabsContent value="preview">
-              {!!activeFragment && <FragmentWeb data={activeFragment} />}
+              {!activeFragment ? (
+                <AuroraLoading />
+              ) : (
+                <FragmentWeb data={activeFragment} />
+              )}
             </TabsContent>
             <TabsContent value="code" className="min-h-0">
               {!!activeFragment?.files && (

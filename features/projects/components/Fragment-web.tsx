@@ -3,6 +3,8 @@ import { ExternalLinkIcon, RefreshCcwIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Hint } from "@/components/hint";
+import { AnimatePresence } from "framer-motion";
+import { AuroraLoading } from "@/components/aurora-loading";
 
 interface Props {
   data: Fragment;
@@ -12,8 +14,10 @@ export function FragmentWeb({ data }: Props) {
   const [copied, setCopied] = useState(false);
 
   const [fragmentkey, setFragmentkey] = useState(0);
+  const [isLoading,setIsLoading] = useState(false)
   const onRefresh = () => {
     setFragmentkey((prev) => prev + 1);
+    setIsLoading(true)
   };
 
   const handelCopy = () => {
@@ -54,13 +58,20 @@ export function FragmentWeb({ data }: Props) {
           </Button>
         </Hint>
       </div>
-      <iframe
-        key={fragmentkey}
-        className="h-full w-full"
-        sandbox="allow-forms allow-same-origin"
-        loading="lazy"
-        src={data.sandboxUrl}
-      />
+      <div className="relative h-full w-full overflow-hidden">
+        <iframe
+          key={fragmentkey}
+          className="h-full w-full transition-opacity duration-500 ease-out data-[loading=true]:opacity-0"
+          data-loading={isLoading}
+          sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-modals allow-downloads"
+          loading="lazy"
+          src={data.sandboxUrl}
+          onLoad={() => setIsLoading(false)}
+        />
+        <AnimatePresence>
+          {isLoading && <AuroraLoading label="Loading files" subtitle="" className="absolute inset-0" />}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
